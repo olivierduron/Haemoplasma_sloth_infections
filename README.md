@@ -4,4 +4,4 @@ This repository provides the dataset, R command lines and scripts used for the s
 
 R command lines and scripts are available here : xxx
 
-The dataset is available here : xxx
+The dataset is available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.xlsx
