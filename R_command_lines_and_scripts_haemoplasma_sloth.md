@@ -110,7 +110,7 @@ data:  table(data_haemoplasma$haemoplasma, data_haemoplasma$species)
 X-squared = 105.27, df = 1, p-value < 2.2e-16
 ```
 
-## Step 4. Test whether haemoplasma infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and blood parasites (GLM model 1)
+## Step 4. Test whether haemoplasma infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and other blood parasites (GLM model 1)
 Create a subset `data_Bt` containing only records for _Bradypus tridactylus_ (Bt):
 
 ```
