@@ -39,13 +39,13 @@ Details about all the experimental methods and measures are available in the rel
 
 ## Step 1. Retrieving the data
 
-All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.xlsx)
+All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv)
 
-This database will be referred to as `data_sloth` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
+This database will be referred to as `data_haemoplasma` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
 
 Load the dataset directly from the GitHub repository to R:
 ```
-data_sloth <- read.csv("https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.xlsx", sep="\t")
+data_haemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Haemoplasma_sloth_infections/main/data_haemoplasma_sloth.csv", sep = "\t")
 ```
 
 
@@ -53,16 +53,17 @@ data_sloth <- read.csv("https://github.com/olivierduron/Haemoplasma_sloth_infect
 
 Convert categorical variables into factors:
 ```
-data_sloth$anaplasma      <- as.factor(data_sloth$anaplasma)
-data_sloth$species        <- as.factor(data_sloth$species)
-data_sloth$season         <- as.factor(data_sloth$season)
-data_sloth$sex            <- as.factor(data_sloth$sex)
-data_sloth$age            <- as.factor(data_sloth$age)
-data_sloth$tick           <- as.factor(data_sloth$tick)
-data_sloth$microfilaria   <- as.factor(data_sloth$microfilaria)
-data_sloth$trypanosome    <- as.factor(data_sloth$trypanosome)
-data_sloth$babesia        <- as.factor(data_sloth$babesia)
-data_sloth$bloodparasite  <- as.factor(data_sloth$bloodparasite)
+data_haemoplasma$haemoplasma      <- as.factor(data_haemoplasma$haemoplasma)
+data_haemoplasma$anaplasma      <- as.factor(data_haemoplasma$anaplasma)
+data_haemoplasma$species        <- as.factor(data_haemoplasma$species)
+data_haemoplasma$season         <- as.factor(data_haemoplasma$season)
+data_haemoplasma$sex            <- as.factor(data_haemoplasma$sex)
+data_haemoplasma$age            <- as.factor(data_haemoplasma$age)
+data_haemoplasma$tick           <- as.factor(data_haemoplasma$tick)
+data_haemoplasma$microfilaria   <- as.factor(data_haemoplasma$microfilaria)
+data_haemoplasma$trypanosome    <- as.factor(data_haemoplasma$trypanosome)
+data_haemoplasma$babesia        <- as.factor(data_haemoplasma$babesia)
+data_haemoplasma$bloodparasite  <- as.factor(data_haemoplasma$bloodparasite)
 ```
 
 Load libraries for analysis: 
@@ -80,50 +81,50 @@ library(survival)
 library(RColorBrewer)
 ```
 
-## Step 3. Calculate *Anaplasma* infection prevalence
-Calculate _Anaplasma_ infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
+## Step 3. Calculate haemoplasma infection prevalence
+Calculate haemoplasma infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
 
 ```
-prevalence_results <- data_sloth %>% group_by(species) %>% summarise(n = n(), positives = sum(anaplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
+prevalence_results <- data_haemoplasma %>% group_by(species) %>% summarise(n = n(), positives = sum(haemoplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
 print(prevalence_results)
 ```
 
 Results are:
 ```
-# A tibble: 2 × 6
-  species     n positives prevalence conf_low conf_high
+A tibble: 2 × 6
+species     n positives prevalence conf_low conf_high
   <fct>   <int>     <int>      <dbl>    <dbl>     <dbl>
-1 Bt         92        58      0.630    0.523     0.729
-2 Cd         83        40      0.482    0.371     0.594
+1 Bt         92         4     0.0435   0.0120     0.108
+2 Cd         83        68     0.819    0.720      0.895
 ```
 
-Test if `anaplasma` is influenced by sloth `species`:
+Test if `haemoplasma` is influenced by sloth `species`:
 ```
-chisq.test(table(data_sloth$anaplasma, data_sloth$species))
+chisq.test(table(data_haemoplasma$haemoplasma, data_haemoplasma$species))
 ```
 
 Results are:
 ```
 Pearson's Chi-squared test with Yates' continuity correction
-data:  table(data_sloth$anaplasma, data_sloth$species)
-X-squared = 3.3261, df = 1, p-value = 0.06819
+data:  table(data_haemoplasma$haemoplasma, data_haemoplasma$species)
+X-squared = 105.27, df = 1, p-value < 2.2e-16
 ```
 
-## Step 4. Test whether _Anaplasma_ infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and blood parasites (GLM model 1)
+## Step 4. Test whether haemoplasma infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and blood parasites (GLM model 1)
 Create a subset `data_Bt` containing only records for _Bradypus tridactylus_ (Bt):
 
 ```
-data_Bt <- subset(data_sloth, species == "Bt")
+data_Bt <- subset(data_haemoplasma, species == "Bt")
 ```
 
-Fit a GLM to test whether `anaplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
+Fit a GLM to test whether `haemoplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
 ```
-model_1 <- glm(anaplasma ~ sex * age * season * tick * bloodparasite, data = data_Bt, family = binomial)
+model_1 <- glm(haemoplasma ~ sex * age * season * tick * bloodparasite, data = data_Bt, family = binomial)
 ```
 
-Fit a GLM to test whether `anaplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
+Fit a GLM to test whether `haemoplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
 ```
-model_1a <- glm(anaplasma ~ sex + age + season + tick + bloodparasite, data = data_Bt, family = binomial)
+model_1a <- glm(haemoplasma ~ sex + age + season + tick + bloodparasite, data = data_Bt, family = binomial)
 ```
 
 Compare the additive model (model_1a) to the interaction model (model_1) using a likelihood ratio test:
@@ -133,6 +134,19 @@ anova(model_1a, model_1, test = "Chisq")
 
 Results are:
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 Analysis of Deviance Table
 Model 1: anaplasma ~ sex + age + season + tick + bloodparasite
 Model 2: anaplasma ~ sex * age * season * tick * bloodparasite
