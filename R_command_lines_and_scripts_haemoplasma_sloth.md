@@ -600,7 +600,7 @@ model_3 <- glm(SMI ~ haemoplasma * bloodparasite * season * sex, data = data_adu
 
 Fit a GLM to test whether SMI is influenced by additive effects of `anaplasma`, `sex`, and `season` in Bt:
 ```
-model_3a <- glm(SMI ~ anaplasma + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_3a <- glm(SMI ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_3a) to the interaction model (model_3) using a likelihood ratio test:
@@ -611,11 +611,11 @@ anova(model_3a, model_3, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ anaplasma + season + sex
-Model 2: SMI ~ anaplasma * season * sex
+Model 1: SMI ~ haemoplasma + bloodparasite + season + sex
+Model 2: SMI ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        79     26.429                     
-2        75     24.043  4   2.3861   0.1142
+1        78     23.641                     
+2        73     22.818  5  0.82298   0.7564
 ```
 
 Compute AIC for both models to evaluate model fit:
@@ -626,9 +626,21 @@ AIC(model_3, model_3a)
 Results are:
 ```
          df      AIC
-model_3   9 150.7068
-model_3a  5 150.5604
+model_3  11 150.3660
+model_3a  6 143.3069
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 
 Perform drop-one-term analysis on the additive model:
 ```
