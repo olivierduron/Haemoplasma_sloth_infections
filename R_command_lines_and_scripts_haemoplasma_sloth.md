@@ -1038,7 +1038,7 @@ ggplot() +
   ) +
   scale_fill_brewer(palette = "Green", name = "SMI level") +
   scale_shape_manual(
-    name = expression(paste(italic("Haemoplasma"), " infection status")),
+    name = expression(paste("Haemoplasma", " infection status")),
     values = c(
       "Male, uninfected" = 0,
       "Male, infected" = 12,
@@ -1065,20 +1065,6 @@ ggplot() +
   )
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Step 7. Impact of haemaplasma infections on Scale Mass Index (SMI) (GLM models 4) in Cd
 Function to calculate SMI for adult Cd:
 ```
@@ -1089,14 +1075,14 @@ L0 <- mean(data_adult_Cd$total_length, na.rm = TRUE)
 data_adult_Cd$SMI <- data_adult_Cd$weight * (L0 / data_adult_Cd$total_length)^b
 ```
 
-Fit a GLM to test whether SMI is influenced by interactions among `anaplasma`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_4 <- glm(SMI ~ anaplasma * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4 <- glm(SMI ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `anaplasma`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_4a <- glm(SMI ~ anaplasma + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4a <- glm(SMI ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_4a) to the interaction model (model_4) using a likelihood ratio test:
@@ -1107,11 +1093,11 @@ anova(model_4a, model_4, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ anaplasma + season + sex
-Model 2: SMI ~ anaplasma * season * sex
+Model 1: SMI ~ haemoplasma + bloodparasite + season + sex
+Model 2: SMI ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        53     29.714                     
-2        49     28.308  4   1.4066   0.6564
+1        52     27.506                     
+2        45     25.399  7    2.106   0.8102
 ```
 
 Compute AIC for both models to evaluate model fit:
@@ -1122,8 +1108,8 @@ AIC(model_4, model_4a)
 Results are:
 ```
          df      AIC
-model_4   9 139.8637
-model_4a  5 134.6278
+model_4  13 141.6847
+model_4a  6 132.2251
 ```
 
 Perform drop-one-term analysis on the additive model:
@@ -1134,12 +1120,14 @@ res <- drop1(model_4a, test = "Chisq")
 Results are:
 ```
 Single term deletions
-Model: SMI ~ anaplasma + season + sex
-          Df Deviance    AIC scaled dev. Pr(>Chi)
-<none>         29.714 134.63                     
-anaplasma  1   30.415 133.96     1.32866   0.2490
-season     1   29.998 133.17     0.54260   0.4614
-sex        1   29.737 132.67     0.04287   0.8360 
+Model:
+SMI ~ haemoplasma + bloodparasite + season + sex
+              Df Deviance    AIC scaled dev. Pr(>Chi)  
+<none>             27.506 132.22                       
+haemoplasma    1   27.514 130.24      0.0178  0.89379  
+bloodparasite  1   30.401 135.93      5.7058  0.01691 *
+season         1   27.725 130.68      0.4539  0.50048  
+sex            1   27.625 130.47      0.2465  0.61958  
 ```
 
 Calculate delta AIC for each term to assess its contribution to model fit:
@@ -1151,23 +1139,26 @@ print(res[, c("AIC", "delta_AIC")])
 
 Results are:
 ```
-             AIC delta_AIC
-<none>    134.63   0.00000
-anaplasma 133.96   0.67134
-season    133.17   1.45740
-sex       132.67   1.95713
+                 AIC delta_AIC
+<none>        132.22    0.0000
+haemoplasma   130.24   -1.9822
+bloodparasite 135.93    3.7058
+season        130.68   -1.5461
+sex           130.47   -1.7535
 ```
 
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model4_null <- glm(SMI ~ 1, data = data_adult_Cd, family = gaussian(link = "identity"))
-model4_anaplasma <- glm(SMI ~ anaplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model4_haemoplasma <- glm(SMI ~ haemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model4_bloodparasite <- glm(SMI ~ bloodparasite, data = data_adult_Cd, family = gaussian(link = "identity"))
 model4_season <- glm(SMI ~ season, data = data_adult_Cd, family = gaussian(link = "identity"))
 model4_sex <- glm(SMI ~ sex, data = data_adult_Cd, family = gaussian(link = "identity"))
-anova(model4_null, model4_anaplasma, test="Chisq")
+anova(model4_null, model4_haemoplasma, test="Chisq")
+anova(model4_null, model4_bloodparasite, test="Chisq")
 anova(model4_null, model4_season, test="Chisq")
 anova(model4_null, model4_sex, test="Chisq")
-aics <- AIC(model4_null, model4_anaplasma, model4_season, model4_sex)
+aics <- AIC(model4_null, model4_haemoplasma, model4_bloodparasite, model4_season, model4_sex)
 aic_null <- aics["model4_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1177,10 +1168,17 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: SMI ~ 1
-Model 2: SMI ~ anaplasma
-  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        56     30.572                     
-2        55     30.043  1  0.52848   0.3253
+Model 2: SMI ~ haemoplasma
+  Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
+1        56     30.572                      
+2        55     30.571  1 0.0004533   0.9772
+---
+Analysis of Deviance Table
+Model 1: SMI ~ 1
+Model 2: SMI ~ bloodparasite
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
+1        56     30.572                       
+2        55     27.933  1   2.6388  0.02264 *
 ---
 Analysis of Deviance Table
 Model 1: SMI ~ 1
@@ -1196,71 +1194,35 @@ Model 2: SMI ~ sex
 1        56     30.572                     
 2        55     30.554  1 0.017332   0.8598
 ---
-                      AIC delta_AIC_vs_null
-model4_null      130.2494          0.000000
-model4_anaplasma 131.2555          1.006055
-model4_season    131.9687          1.719234
-model4_sex       132.2171          1.967676
+AIC delta_AIC_vs_null
+model4_null          130.2494          0.000000
+model4_haemoplasma   132.2486          1.999155
+model4_bloodparasite 127.1041         -3.145367
+model4_season        131.9687          1.719234
+model4_sex           132.2171          1.967676
 ```
 
-Fit a linear model to test the null hypothesis (SMI ~ 1) in adult Bt, assessing model fit and checking residual normality:
+Assess residual normality and heteroscedasticity:
 ```
-model_4b <- glm(SMI ~ 1, data = data_adult_Cd, family = gaussian(link = "identity"))
-anova(model_4b, model_4, test = "Chisq")
-AIC(model_4b, model_4)
-shapiro.test(model_4b$residuals)
+shapiro.test(model4_bloodparasite$residuals)
+bptest(model4_bloodparasite)
 ```
 
 Results are:
 ```
-> anova(model_4b, model_4, test = "Chisq")
-Analysis of Deviance Table
-Model 1: SMI ~ 1
-Model 2: SMI ~ anaplasma * season * sex
-  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        56     30.572                     
-2        49     28.308  7    2.264   0.7891
-
-> AIC(model_4b, model_4)
-         df      AIC
-model_4b  2 130.2494
-model_4   9 139.8637
-
-> shapiro.test(model_4b$residuals)
 Shapiro-Wilk normality test
-data:  model_4b$residuals
-W = 0.97913, p-value = 0.4275
+data:  model4_bloodparasite$residuals
+W = 0.97176, p-value = 0.2024
+---
+studentized Breusch-Pagan test
+data:  model4_bloodparasite
+BP = 0.37341, df = 1, p-value = 0.5412
 ```
 
-Post hoc power analyses for SMI tests in Cd:
+Post hoc power analyses for SMI tests in Cd (for full interaction model):
 ```
-n <- nrow(na.omit(data_adult_Cd[, c("SMI", "anaplasma", "season", "sex")]))
-k <- 7
-pwr.f2.test(u = k, v = n - k - 1, f2 = 0.30, sig.level = 0.05)
-pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
-```
-
-Results are:
-```
-Multiple regression power calculation (f2 = 0.30)
-u = 7
-v = 49
-f2 = 0.3
-sig.level = 0.05
-power = 0.8166297
-and
-Multiple regression power calculation (f2 = 0.20)
-u = 7
-v = 49
-f2 = 0.2
-sig.level = 0.05
-power = 0.6102676
-```
-
-Post hoc power analyses for SMI tests in Cd (null model, `SMI` ~ 1 and adding `anaplasma`):
-```
-n <- nrow(na.omit(data_adult_Cd[, c("SMI", "anaplasma")]))
-k <- 1  # 1 paramètre d'intérêt
+n <- nrow(na.omit(data_adult_Cd[, c("SMI", "haemoplasma", "bloodparasite", "season", "sex")]))
+k <- 15
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.30, sig.level = 0.05)
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
 ```
@@ -1268,19 +1230,126 @@ pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
 Results are:
 ```
 Multiple regression power calculation 
-u = 1
-v = 55
+u = 15
+v = 41
 f2 = 0.3
 sig.level = 0.05
-power = 0.9822249
-and
+power = 0.5978527
+---
 Multiple regression power calculation 
-u = 1
-v = 55
+u = 15
+v = 41
 f2 = 0.2
 sig.level = 0.05
-power = 0.9125943
+power = 0.3970745
 ```
+
+Post hoc power analyses for SMI tests in Cd (for `SMI` ~ `bloodparasite` and adding `haemoplasma`):
+```
+n <- nrow(na.omit(data_adult_Cd[, c("SMI", "bloodparasite" "haemoplasma")]))
+k <- 3
+pwr.f2.test(u = k, v = n - k - 1, f2 = 0.30, sig.level = 0.05)
+pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
+```
+
+Results are:
+```
+Multiple regression power calculation 
+u = 3
+v = 53
+f2 = 0.3
+sig.level = 0.05
+power = 0.9321324
+---
+Multiple regression power calculation 
+u = 3
+v = 53
+f2 = 0.2
+sig.level = 0.05
+power = 0.787044
+```
+
+AUTRE ESSAI BLOODPARASITE EN 1 PAR 1 A VOIR SI GARDER OU PAS
+
+Fit a GLM to test whether SMI is influenced by interactions among `haemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
+```
+model_4bis <- glm(SMI ~ haemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+```
+
+Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
+```
+model_4bisa <- glm(SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+```
+
+Compare the additive model (model_4bisa) to the interaction model (model_4bis) using a likelihood ratio test:
+```
+anova(model_4bisa, model_4bis, test = "Chisq")
+```
+
+Results are:
+```
+Analysis of Deviance Table
+Model 1: SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
+Model 2: SMI ~ haemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1        49     28.333                     
+2        34     20.363 15   7.9702   0.5786
+```
+
+Compute AIC for both models to evaluate model fit:
+```
+AIC(model_4bis, model_4bisa)
+```
+
+Results are:
+```
+            df      AIC
+model_4bis  24 151.0877
+model_4bisa  9 139.9153
+```
+
+Perform drop-one-term analysis on the additive model:
+```
+res <- drop1(model_4bisa, test = "Chisq")
+```
+
+Results are:
+```
+Single term deletions
+Model:
+SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
+             Df Deviance    AIC scaled dev. Pr(>Chi)
+<none>            28.333 139.91                     
+haemoplasma   1   28.335 137.92     0.00399   0.9496
+anaplasma     1   28.885 139.01     1.09981   0.2943
+microfilaria  1   29.568 140.35     2.43203   0.1189
+trypanosome   1   28.452 138.15     0.23902   0.6249
+babesia       1   28.431 138.11     0.19698   0.6572
+season        1   28.647 138.54     0.62787   0.4281
+sex           1   28.430 138.11     0.19435   0.6593
+```
+
+Calculate delta AIC for each term to assess its contribution to model fit:
+```
+aic_full <- AIC(model_4bisa)
+res$delta_AIC <- res$AIC - aic_full
+print(res[, c("AIC", "delta_AIC")])
+```
+
+Results are:
+```
+                AIC delta_AIC
+<none>       139.91   0.00000
+haemoplasma  137.92  -1.99601
+anaplasma    139.01  -0.90019
+microfilaria 140.35   0.43203
+trypanosome  138.15  -1.76098
+babesia      138.11  -1.80302
+season       138.54  -1.37213
+sex          138.11  -1.80565
+```
+
+FIN ESSAI 4bis MAIS IL FAUDRA SANS DOUTE CREER UNE VARIABLE  HAEMOPLASMA + BLOODPARASITE :(
 
 Generate SMI chart for Cd:
 ```
@@ -1291,10 +1360,10 @@ clean_data <- data_adult_Cd %>%
   ) %>%
   mutate(
     sex_infect = case_when(
-      sex == "M" & anaplasma == 0 ~ "Male, uninfected",
-      sex == "M" & anaplasma == 1 ~ "Male, infected",
-      sex == "F" & anaplasma == 0 ~ "Female, uninfected",
-      sex == "F" & anaplasma == 1 ~ "Female, infected",
+      sex == "M" & haemoplasma == 0 ~ "Male, uninfected",
+      sex == "M" & haemoplasma == 1 ~ "Male, infected",
+      sex == "F" & haemoplasma == 0 ~ "Female, uninfected",
+      sex == "F" & haemoplasma == 1 ~ "Female, infected",
       TRUE ~ NA_character_
     )
   )
@@ -1335,7 +1404,7 @@ ggplot() +
   ) +
   scale_fill_brewer(palette = "YlOrBr", name = "SMI level") +
   scale_shape_manual(
-    name = expression(paste(italic("Anaplasma"), " infection status")),
+    name = expression(paste("Haemoplasma", " infection status")),
     values = c(
       "Male, uninfected" = 0,
       "Male, infected" = 12,
