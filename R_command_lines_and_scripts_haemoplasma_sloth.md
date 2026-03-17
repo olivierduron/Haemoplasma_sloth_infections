@@ -1431,16 +1431,16 @@ ggplot() +
   )
 ```
 
-## Step 8. Impact of _Anaplasma_ infections on neck circumference (GLM models 5 and 6)
+## Step 8. Impact of heamoplasma infections on neck circumference (GLM models 5 and 6)
 
-Fit a GLM to test whether neck circumference is influenced by interactions among `anaplasma`, `sex`, and `season` in Bt:
+Fit a GLM to test whether neck circumference is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_5 <- glm(log(neck_size) ~ anaplasma * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_5 <- glm(log(neck_size) ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Fit a GLM to test whether SMI is influenced by additive effects of `anaplasma`, `sex`, and `season` in Bt:
 ```
-model_5a <- glm(log(neck_size) ~ anaplasma + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_5a <- glm(log(neck_size) ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_5a) to the interaction model (model_5) using a likelihood ratio test:
@@ -1451,11 +1451,11 @@ anova(model_5a, model_5, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: log(neck_size) ~ anaplasma + season + sex
-Model 2: log(neck_size) ~ anaplasma * season * sex
+Model 1: log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        57    0.49104                     
-2        53    0.48101  4 0.010032   0.8934
+1        56    0.47867                     
+2        52    0.45529  4 0.023386   0.6143
 ```
 
 Compute AIC for both models to evaluate model fit:
@@ -1466,8 +1466,8 @@ AIC(model_5, model_5a)
 Results are:
 ```
          df       AIC
-model_5   9  104.2969
-model_5a  5  111.0378
+model_5  10 -105.6494
+model_5a  6 -110.5939
 ```
 
 
@@ -1480,12 +1480,13 @@ Results are:
 ```
 Single term deletions
 Model:
-log(neck_size) ~ anaplasma + season + sex
-          Df Deviance     AIC scaled dev. Pr(>Chi)  
-<none>        0.49104  111.04                       
-anaplasma  1  0.49589  112.44     0.59895  0.43898  
-season     1  0.49389  112.69     0.35268  0.55260  
-sex        1  0.51549  110.07     2.96411  0.08513
+log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+              Df Deviance     AIC scaled dev. Pr(>Chi)
+<none>            0.47867 -110.59                     
+haemoplasma    1  0.48450 -111.86     0.73846   0.3902
+bloodparasite  1  0.48917 -111.27     1.32339   0.2500
+season         1  0.48060 -112.35     0.24482   0.6207
+sex            1  0.49638 -110.38     2.21631   0.1366
 ```
 
 Calculate delta AIC for each term to assess its contribution to model fit:
@@ -1497,23 +1498,26 @@ print(res[, c("AIC", "delta_AIC")])
 
 Results are:
 ```
-              AIC delta_AIC
-<none>     111.04   0.00000
-anaplasma  112.44   1.40105
-season     112.69   1.64732
-sex        110.07   0.96411
+                  AIC delta_AIC
+<none>        -110.59   0.00000
+haemoplasma   -111.86  -1.26154
+bloodparasite -111.27  -0.67661
+season        -112.35  -1.75518
+sex           -110.38   0.21631
 ```
 
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model5_null <- glm(log(neck_size) ~ 1, data = data_adult_Bt, family = gaussian(link = "identity"))
-model5_anaplasma <- glm(log(neck_size) ~ anaplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
+model5_haemoplasma <- glm(log(neck_size) ~ haemoplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
+model5_bloodparasite <- glm(log(neck_size) ~ bloodparasite, data = data_adult_Bt, family = gaussian(link = "identity"))
 model5_season <- glm(log(neck_size) ~ season, data = data_adult_Bt, family = gaussian(link = "identity"))
 model5_sex <- glm(log(neck_size) ~ sex, data = data_adult_Bt, family = gaussian(link = "identity"))
-anova(model5_null, model5_anaplasma, test="Chisq")
+anova(model5_null, model5_haemoplasma, test="Chisq")
+anova(model5_null, model5_bloodparasite, test="Chisq")
 anova(model5_null, model5_season, test="Chisq")
 anova(model5_null, model5_sex, test="Chisq")
-aics <- AIC(model5_null, model5_anaplasma, model5_season, model5_sex)
+aics <- AIC(model5_null, model5_haemoplasma, model5_bloodparasite, model5_season, model5_sex)
 aic_null <- aics["model5_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1523,10 +1527,17 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ anaplasma
-  Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
-1        60    0.52778                      
-2        59    0.51872  1 0.0090608     0.31
+Model 2: log(neck_size) ~ haemoplasma
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1        60    0.52778                     
+2        59    0.51330  1 0.014479    0.197
+---
+Analysis of Deviance Table
+Model 1: log(neck_size) ~ 1
+Model 2: log(neck_size) ~ bloodparasite
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1        60    0.52778                     
+2        59    0.51039  1 0.017391   0.1562
 ---
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
@@ -1540,13 +1551,13 @@ Model 1: log(neck_size) ~ 1
 Model 2: log(neck_size) ~ sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        60    0.52778                       
-2        59    0.49900  1 0.028786  0.06505
+2        59    0.49900  1 0.028786  0.06505 .
 ---
-                       AIC delta_AIC_vs_null
-model5_null       112.6360         0.0000000
-model5_anaplasma  111.6923         0.9436813
-model5_season     111.0596         1.5763372
-model5_sex        114.0572         1.4212353
+model5_null          -112.6360        0.00000000
+model5_haemoplasma   -112.3329        0.30312861
+model5_bloodparasite -112.6798       -0.04384486
+model5_season        -111.0596        1.57633716
+model5_sex           -114.0572       -1.42123531
 ```
 
 Fit a linear model to test the null hypothesis (`neck_size` ~ 1) in adult Bt, assessing model fit and checking residual normality:
@@ -1559,33 +1570,30 @@ shapiro.test(model_5b$residuals)
 
 Results are:
 ```
-> anova(model_5b, model_5, test = "Chisq")
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ anaplasma * season * sex
+Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        60    0.52778                     
-2        53    0.48101  7 0.046776   0.6412
-
-> AIC(model_5b, model_5)
+2        52    0.45529  8 0.072498   0.4066
+---
          df       AIC
-model_5b  2  112.6360
-model_5   9  104.2969
-
-> shapiro.test(model_5b$residuals)
+model_5b  2 -112.6360
+model_5  10 -105.6494
+---
 Shapiro-Wilk normality test
 data:  model_5b$residuals
 W = 0.96651, p-value = 0.09328
 ```
 
-Fit a GLM to test whether neck circumference is influenced by interactions among `anaplasma`, `sex`, and `season` in Cd:
+Fit a GLM to test whether neck circumference is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_6 <- glm(log(neck_size) ~ anaplasma * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_6 <- glm(log(neck_size) ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `anaplasma`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_6a <- glm(log(neck_size) ~ anaplasma + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_6a <- glm(log(neck_size) ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_6a) to the interaction model (model_6) using a likelihood ratio test:
@@ -1596,11 +1604,11 @@ anova(model_6a, model_6, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: log(neck_size) ~ anaplasma + season + sex
-Model 2: log(neck_size) ~ anaplasma * season * sex
+Model 1: log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        44    0.56030                     
-2        40    0.48671  4 0.073594   0.1956
+1        43    0.55930                     
+2        36    0.42106  7  0.13824   0.1067
 ```
 
 Compute AIC for both models to evaluate model fit:
@@ -1611,8 +1619,8 @@ AIC(model_6, model_6a)
 Results are:
 ```
          df       AIC
-model_6   9  66.16370
-model_6a  5  67.40481
+model_6  13 -65.11804
+model_6a  6 -65.49074
 ```
 
 Perform drop-one-term analysis on the additive model:
@@ -1624,12 +1632,13 @@ Results are:
 ```
 Single term deletions
 Model:
-log(neck_size) ~ anaplasma + season + sex
-          Df Deviance     AIC scaled dev. Pr(>Chi)
-<none>        0.56030  67.405                     
-anaplasma  1  0.56124  69.324     0.08052   0.7766
-season     1  0.58022  67.728     1.67690   0.1953
-sex        1  0.57931  67.804     1.60083   0.2058
+log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+              Df Deviance     AIC scaled dev. Pr(>Chi)
+<none>            0.55930 -65.491                     
+haemoplasma    1  0.55935 -67.486     0.00426   0.9480
+bloodparasite  1  0.56108 -67.338     0.15253   0.6961
+season         1  0.57932 -65.802     1.68826   0.1938
+sex            1  0.57644 -66.042     1.44873   0.2287
 ```
 
 Calculate delta AIC for each term to assess its contribution to model fit:
@@ -1641,23 +1650,26 @@ print(res[, c("AIC", "delta_AIC")])
 
 Results are:
 ```
-              AIC delta_AIC
-<none>     67.405   0.00000
-anaplasma  69.324   1.91948
-season     67.728   0.32310
-sex        67.804   0.39917
+                  AIC delta_AIC
+<none>        -65.491   0.00000
+haemoplasma   -67.486  -1.99574
+bloodparasite -67.338  -1.84747
+season        -65.802  -0.31174
+sex           -66.042  -0.55127
 ```
 
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model6_null <- glm(log(neck_size) ~ 1, data = data_adult_Cd, family = gaussian(link = "identity"))
-model6_anaplasma <- glm(log(neck_size) ~ anaplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model6_haemoplasma <- glm(log(neck_size) ~ haemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model6_bloodparasite <- glm(log(neck_size) ~ bloodparasite, data = data_adult_Cd, family = gaussian(link = "identity"))
 model6_season <- glm(log(neck_size) ~ season, data = data_adult_Cd, family = gaussian(link = "identity"))
 model6_sex <- glm(log(neck_size) ~ sex, data = data_adult_Cd, family = gaussian(link = "identity"))
-anova(model6_null, model6_anaplasma, test="Chisq")
+anova(model6_null, model6_haemoplasma, test="Chisq")
+anova(model6_null, model6_bloodparasite, test="Chisq")
 anova(model6_null, model6_season, test="Chisq")
 anova(model6_null, model6_sex, test="Chisq")
-aics <- AIC(model6_null, model6_anaplasma, model6_season, model6_sex)
+aics <- AIC(model6_null, model6_haemoplasma, model6_bloodparasite, model6_season, model6_sex)
 aic_null <- aics["model6_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1667,10 +1679,17 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ anaplasma
+Model 2: log(neck_size) ~ haemoplasma
   Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
 1        47    0.60752                      
-2        46    0.60490  1 0.0026148   0.6557
+2        46    0.60512  1 0.0024025   0.6691
+---
+Analysis of Deviance Table
+Model 1: log(neck_size) ~ 1
+Model 2: log(neck_size) ~ bloodparasite
+  Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
+1        47    0.60752                      
+2        46    0.60334  1 0.0041827   0.5723
 ---
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
@@ -1686,11 +1705,12 @@ Model 2: log(neck_size) ~ sex
 1        47    0.60752                     
 2        46    0.58267  1 0.024851   0.1613
 ---
-                       AIC delta_AIC_vs_null
-model6_null       69.52144       0.000000000
-model6_anaplasma  67.72848       1.792960785
-model6_season     69.73015       0.208715492
-model6_sex        69.52621       0.004777113
+                           AIC delta_AIC_vs_null
+model6_null          -69.52144       0.000000000
+model6_haemoplasma   -67.71164       1.809799276
+model6_bloodparasite -67.85305       1.668385770
+model6_season        -69.73015      -0.208715492
+model6_sex           -69.52621      -0.004777113
 ```
 
 Fit a linear model to test the null hypothesis (`neck_size` ~ 1) in adult Cd, assessing model fit and checking residual normality:
@@ -1703,34 +1723,31 @@ shapiro.test(model_6b$residuals)
 
 Results are:
 ```
-> anova(model_6b, model_6, test = "Chisq")
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ anaplasma * season * sex
+Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        47    0.60752                     
-2        40    0.48671  7  0.12081   0.1927
-
-> AIC(model_6b, model_6)
+2        36    0.42106 11  0.18645   0.1433
+---
          df       AIC
-model_6b  2  69.52144
-model_6   9  66.16370
-
-> shapiro.test(model_6b$residuals)
+model_6b  2 -69.52144
+model_6  13 -65.11804
+---
 Shapiro-Wilk normality test
 data:  model_6b$residuals
 W = 0.97242, p-value = 0.3137
 ```
 
 ## Step 9. Impact of _Anaplasma_ infections on hematocrit levels (GLM models 7, 8 and 9)
-Fit a GLM to test whether `hematocrit` is influenced by interactions among `anaplasma`, `sex`, and `season` in Bt:
+Fit a GLM to test whether `hematocrit` is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_7 <- glm(hematocrit ~ anaplasma * season * sex, data = data_adult_Bt, family = Gamma(link = "log"))
+model_7 <- glm(hematocrit ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = Gamma(link = "log"))
 ```
 
-Fit a GLM to test whether `hematocrit` is influenced by additive effects of `anaplasma`, `sex`, and `season` in Bt:
+Fit a GLM to test whether `hematocrit` is influenced by additive effects of haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_7a <- glm(hematocrit ~ anaplasma + season + sex, data = data_adult_Bt, family = Gamma(link = "log"))
+model_7a <- glm(hematocrit ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = Gamma(link = "log"))
 ```
 
 Compare the additive model (model_7a) to the interaction model (model_7) using a likelihood ratio test:
@@ -1741,11 +1758,11 @@ anova(model_7a, model_7, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: hematocrit ~ anaplasma + season + sex
-Model 2: hematocrit ~ anaplasma * season * sex
+Model 1: hematocrit ~ haemoplasma + bloodparasite + season + sex
+Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-1        80     1.3305                     
-2        76     1.3196  4 0.010861   0.9606
+1        79     1.3166                     
+2        74     1.1985  5  0.11806   0.2065
 ```
 
 Compute AIC for both models to evaluate model fit:
@@ -1756,8 +1773,8 @@ AIC(model_7, model_7a)
 Results are:
 ```
          df      AIC
-model_7   9 521.9397
-model_7a  5 514.6301
+model_7  11 517.8352
+model_7a  6 515.7467
 ```
 
 Perform drop-one-term analysis on the additive model:
@@ -1769,12 +1786,13 @@ Results are:
 ```
 Single term deletions
 Model:
-hematocrit ~ anaplasma + season + sex
-          Df Deviance    AIC scaled dev. Pr(>Chi)  
-<none>         1.3305 514.63                       
-anaplasma  1   1.3327 512.76      0.1334  0.71490  
-season     1   1.3400 513.20      0.5723  0.44933  
-sex        1   1.3859 515.94      3.3145  0.06867
+hematocrit ~ haemoplasma + bloodparasite + season + sex
+              Df Deviance    AIC scaled dev. Pr(>Chi)  
+<none>             1.3166 515.75                       
+haemoplasma    1   1.3209 514.00      0.2550  0.61358  
+bloodparasite  1   1.3258 514.29      0.5474  0.45937  
+season         1   1.3238 514.18      0.4285  0.51273  
+sex            1   1.3825 517.67      3.9191  0.04774 *
 ```
 
 Calculate delta AIC for each term to assess its contribution to model fit:
@@ -1786,23 +1804,26 @@ print(res[, c("AIC", "delta_AIC")])
 
 Results are:
 ```
-             AIC delta_AIC
-<none>    514.63    0.0000
-anaplasma 512.76    1.8666
-season    513.20    1.4277
-sex       515.94    1.3145
+                 AIC delta_AIC
+<none>        515.75    0.0000
+haemoplasma   514.00   -1.7450
+bloodparasite 514.29   -1.4526
+season        514.18   -1.5715
+sex           517.67    1.9191
 ```
 
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model7_null <- glm(hematocrit ~ 1, data = data_adult_Bt, family = Gamma(link = "log"))
-model7_anaplasma <- glm(hematocrit ~ anaplasma, data = data_adult_Bt, family = Gamma(link = "log"))
+model7_haemoplasma <- glm(hematocrit ~ haemoplasma, data = data_adult_Bt, family = Gamma(link = "log"))
+model7_bloodparasite <- glm(hematocrit ~ bloodparasite, data = data_adult_Bt, family = Gamma(link = "log"))
 model7_season <- glm(hematocrit ~ season, data = data_adult_Bt, family = Gamma(link = "log"))
 model7_sex <- glm(hematocrit ~ sex, data = data_adult_Bt, family = Gamma(link = "log"))
-anova(model7_null, model7_anaplasma, test="Chisq")
+anova(model7_null, model7_haemoplasma, test="Chisq")
+anova(model7_null, model7_bloodparasite, test="Chisq")
 anova(model7_null, model7_season, test="Chisq")
 anova(model7_null, model7_sex, test="Chisq")
-aics <- AIC(model7_null, model7_anaplasma, model7_season, model7_sex)
+aics <- AIC(model7_null, model7_haemoplasma, model7_bloodparasite, model7_season, model7_sex)
 aic_null <- aics["model7_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1812,10 +1833,17 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: hematocrit ~ 1
-Model 2: hematocrit ~ anaplasma
+Model 2: hematocrit ~ haemoplasma
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1        83     1.4015                     
+2        82     1.3936  1 0.007882   0.4994
+---
+Analysis of Deviance Table
+Model 1: hematocrit ~ 1
+Model 2: hematocrit ~ bloodparasite
   Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
 1        83     1.4015                      
-2        82     1.3948  1 0.0066991   0.5339
+2        82     1.3950  1 0.0064542   0.5418
 ---
 Analysis of Deviance Table
 Model 1: hematocrit ~ 1
@@ -1829,13 +1857,14 @@ Model 1: hematocrit ~ 1
 Model 2: hematocrit ~ sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        83     1.4015                       
-2        82     1.3423  1 0.059141  0.05883 
+2        82     1.3423  1 0.059141  0.05883 .
 ---
-                      AIC delta_AIC_vs_null
-model7_null      513.0105          0.000000
-model7_anaplasma 514.6069          1.596403
-model7_season    514.4722          1.461711
-model7_sex       511.3790          1.631481
+                          AIC delta_AIC_vs_null
+model7_null          513.0105          0.000000
+model7_haemoplasma   514.5354          1.524936
+model7_bloodparasite 514.6217          1.611190
+model7_season        514.4722          1.461711
+model7_sex           511.3790         -1.631481
 ```
 
 Fit a linear model to test the null hypothesis (`hematocrit` ~ 1) in adult Bt, assessing model fit:
@@ -1847,19 +1876,63 @@ AIC(model_7b, model_7)
 
 Results are:
 ```
-> anova(model_7b, model_7, test = "Chisq")
 Analysis of Deviance Table
 Model 1: hematocrit ~ 1
-Model 2: hematocrit ~ anaplasma * season * sex
+Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        83     1.4015                     
-2        76     1.3196  7 0.081886   0.6976
-
-> AIC(model_7b, model_7)
+2        74     1.1985  9  0.20297   0.1932
+---
          df      AIC
 model_7b  2 513.0105
-model_7   9 521.9397
+model_7  11 517.8352
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Generate diagnostic plots (residuals, leverage, etc.) for model_7b to assess model fit and identify potential outliers:
 ```
