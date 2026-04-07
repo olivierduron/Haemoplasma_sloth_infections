@@ -10,6 +10,6 @@ We used data from two main sources:
 
 R command lines and scripts are available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/R_command_lines_and_scripts_haemoplasma_sloth.md
 
-The epidemiological survey dataset is available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/xxx
+The epidemiological survey dataset is available here : https://github.com/olivierduron/Haemoplasma_infections/blob/main/xxx
 
 The veterinary evaluation dataset is available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv
