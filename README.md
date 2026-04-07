@@ -6,12 +6,12 @@ We used data from two main sources:
 
 (1) an epidemiological survey of infections in 1,555 specimens representing 71 species, including 44 wild mammal species, five passerine bird species, and 22 tick species.
 
--> The epidemiological survey dataset is available here : https://github.com/olivierduron/Haemoplasma_infections/blob/main/xxx
+-> The epidemiological survey dataset is available XXX
 
--> The epidemiological survey R command lines and scripts are available [here](https://github.com/olivierduron/Haemoplasma_infections/blob/main/R_command_lines_and_scripts_haemoplasma_survey.md)
+-> The epidemiological survey R command lines and scripts are available [here](https://github.com/olivierduron/Haemoplasma_infections/blob/main/R_command_lines_and_scripts_haemoplasma_survey.md).
 
 (2) veterinary evaluations conducted on wild brown-throated sloths (*Bradypus tridactylus*) and Linnaeus’s two-toed sloths (*Choloepus didactylus*) to investigate the effects of infection.
 
--> The veterinary evaluation dataset is available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv
+-> The veterinary evaluation dataset is available [here](https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv).
 
--> The veterinary evaluation R command lines and scripts are available here : https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/R_command_lines_and_scripts_haemoplasma_sloth.md
+-> The veterinary evaluation R command lines and scripts are available [here)(https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/R_command_lines_and_scripts_haemoplasma_sloth.md).
