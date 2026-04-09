@@ -320,7 +320,7 @@ print("=== All infected species ===")
 print(summary(glm_all))
 print(anova_all)
 ```
-```
+
 Results are:
 ```
 Call:
