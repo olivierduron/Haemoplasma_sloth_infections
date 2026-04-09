@@ -190,6 +190,7 @@ glm_model_null_f <- glm(
 # Likelihood ratio test
 anova_filtered <- anova(glm_model_null_f, glm_model_f, test = "Chisq")
 print(anova_filtered)
+```
 
 Results are:
 ```
