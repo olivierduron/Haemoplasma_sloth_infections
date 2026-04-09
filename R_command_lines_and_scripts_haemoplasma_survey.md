@@ -1,28 +1,15 @@
 # **Hemoplasma epidemiological survey : R command lines and script**
 
-EN TRAVAUX - A MODIFIER
-We analyzed data from 175 wild sloths captured between 1994 and 1995 during the flooding of the Petit Saut Dam (5°03′43″ N, 53°03′00″ O) on the Sinnamary River (French Guiana, South America). The clinical data include the following variables for each examined sloth: 
-- `species` : Sloth species (Bt: *Bradypus tridactylus*; Cd: *Choloepus didactylus*)
-- `sex` : Sex of the sloth (F: Female; M: Male)
-- `age_class` : Age category (A: Adult; J: Juvenile)
-- `season` : Season of capture (W: Wet; D: Dry)
-- `weight` : Body weight (quantitative variable, in kg)
-- `total_length` : Total body length (quantitative variable, in cm)
-- `wither_height` : Height at the withers (quantitative variable, in cm)
-- `neck_size` : Neck circumference (quantitative variable, in cm)
-- `temperature` : Body temperature (quantitative variable, in °C)
-- `hematocrit` : Hematocrit level (quantitative variable, in %)
-- `health_condition` : Overall health status (G: Good; D: Deteriorated)
-- `hemoplasma` : Infection status with haemotropic mycoplasmas (0: Uninfected; 1: Infected)
-- `anaplasma` : Infection status with *Anaplasma* (0: Uninfected; 1: Infected)
-- `tick` : Presence of ticks in the fur (0: Absent; 1: Present)
-- `microfilaria` : Infection status with microfilariae (0: Uninfected; 1: Infected)
-- `trypanosome` : Infection status with trypanosomes (0: Uninfected; 1: Infected)
-- `babesia` : Infection status with _Babesia_ (0: Uninfected; 1: Infected)
-- `bloodparasite` : Combined infection status for blood parasites/pathogens (_Anaplasma_ + microfilariae + trypanosome + _Babesia_, but excluding haemotropic mycoplasmas; 0: Uninfected; 1: Infected)
+We analyzed data from 626 individuals across 44 wild mammal species captured in French Guiana. The epidemiological dataset includes the following variables for each sampled individual:
+- `species` : Species identity (one of the 44 wild mammal species included in this study)
+- `order` : Species taxonomic order
+- `hemoplasma` : Infection status with hemotropic mycoplasmas (0: Uninfected; 1: Infected)
+- `anaplasmataceae` : Infection status with bacteria from the Anaplasmataceae family (*Anaplasma*, *Ehrlichia* and *Allocryptoplasma*) (0: Uninfected; 1: Infected)
+- `apicomplexa` : Infection status with blood parasites, including piroplasmids (*Babesia* and *Theileria*) and haemogregarines (*Hepatozoon* and *Hemolivia*) (0: Uninfected; 1: Infected)
+- `trypanosoma` : Infection status with trypanosomes (0: Uninfected; 1: Infected)
+- `filaria` : Infection status with microfilariae (0: Uninfected; 1: Infected)
   
 Details about all the experimental methods and measures are available in the related manuscript.
-
 
 ## Table of contents 
 - [Step 1. Retrieving the data](#step-1-retrieving-the-data)
