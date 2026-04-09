@@ -1,4 +1,4 @@
-# **Haemoplasma veterinary evaluations : R command lines and script**
+# **Hemoplasma veterinary evaluations : R command lines and script**
 
 We analyzed data from 175 wild sloths captured between 1994 and 1995 during the flooding of the Petit Saut Dam (5°03′43″ N, 53°03′00″ O) on the Sinnamary River (French Guiana, South America). The clinical data include the following variables for each examined sloth: 
 - `species` : Sloth species (Bt: *Bradypus tridactylus*; Cd: *Choloepus didactylus*)
@@ -12,7 +12,7 @@ We analyzed data from 175 wild sloths captured between 1994 and 1995 during the 
 - `temperature` : Body temperature (quantitative variable, in °C)
 - `hematocrit` : Hematocrit level (quantitative variable, in %)
 - `health_condition` : Overall health status (G: Good; D: Deteriorated)
-- `haemoplasma` : Infection status with haemotropic mycoplasmas (0: Uninfected; 1: Infected)
+- `hemoplasma` : Infection status with haemotropic mycoplasmas (0: Uninfected; 1: Infected)
 - `anaplasma` : Infection status with *Anaplasma* (0: Uninfected; 1: Infected)
 - `tick` : Presence of ticks in the fur (0: Absent; 1: Present)
 - `microfilaria` : Infection status with microfilariae (0: Uninfected; 1: Infected)
@@ -39,13 +39,13 @@ Details about all the experimental methods and measures are available in the rel
 
 ## Step 1. Retrieving the data
 
-All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv)
+All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Hemoplasma_sloth_infections/blob/main/data_hemoplasma_sloth.csv)
 
-This database will be referred to as `data_haemoplasma` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
+This database will be referred to as `data_hemoplasma` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
 
 Load the dataset directly from the GitHub repository to R:
 ```
-data_haemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Haemoplasma_sloth_infections/main/data_haemoplasma_sloth.csv", sep = "\t")
+data_hemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Hemoplasma_sloth_infections/main/data_hemoplasma_sloth.csv", sep = "\t")
 ```
 
 
@@ -53,17 +53,17 @@ data_haemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Ha
 
 Convert categorical variables into factors:
 ```
-data_haemoplasma$haemoplasma      <- as.factor(data_haemoplasma$haemoplasma)
-data_haemoplasma$anaplasma      <- as.factor(data_haemoplasma$anaplasma)
-data_haemoplasma$species        <- as.factor(data_haemoplasma$species)
-data_haemoplasma$season         <- as.factor(data_haemoplasma$season)
-data_haemoplasma$sex            <- as.factor(data_haemoplasma$sex)
-data_haemoplasma$age            <- as.factor(data_haemoplasma$age)
-data_haemoplasma$tick           <- as.factor(data_haemoplasma$tick)
-data_haemoplasma$microfilaria   <- as.factor(data_haemoplasma$microfilaria)
-data_haemoplasma$trypanosome    <- as.factor(data_haemoplasma$trypanosome)
-data_haemoplasma$babesia        <- as.factor(data_haemoplasma$babesia)
-data_haemoplasma$bloodparasite  <- as.factor(data_haemoplasma$bloodparasite)
+data_hemoplasma$hemoplasma      <- as.factor(data_hemoplasma$hemoplasma)
+data_hemoplasma$anaplasma      <- as.factor(data_hemoplasma$anaplasma)
+data_hemoplasma$species        <- as.factor(data_hemoplasma$species)
+data_hemoplasma$season         <- as.factor(data_hemoplasma$season)
+data_hemoplasma$sex            <- as.factor(data_hemoplasma$sex)
+data_hemoplasma$age            <- as.factor(data_hemoplasma$age)
+data_hemoplasma$tick           <- as.factor(data_hemoplasma$tick)
+data_hemoplasma$microfilaria   <- as.factor(data_hemoplasma$microfilaria)
+data_hemoplasma$trypanosome    <- as.factor(data_hemoplasma$trypanosome)
+data_hemoplasma$babesia        <- as.factor(data_hemoplasma$babesia)
+data_hemoplasma$bloodparasite  <- as.factor(data_hemoplasma$bloodparasite)
 ```
 
 Load libraries for analysis: 
@@ -81,11 +81,11 @@ library(survival)
 library(RColorBrewer)
 ```
 
-## Step 3. Calculate haemoplasma infection prevalence
-Calculate haemoplasma infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
+## Step 3. Calculate hemoplasma infection prevalence
+Calculate hemoplasma infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
 
 ```
-prevalence_results <- data_haemoplasma %>% group_by(species) %>% summarise(n = n(), positives = sum(haemoplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
+prevalence_results <- data_hemoplasma %>% group_by(species) %>% summarise(n = n(), positives = sum(hemoplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
 print(prevalence_results)
 ```
 
@@ -98,33 +98,33 @@ species     n positives prevalence conf_low conf_high
 2 Cd         83        68     0.819    0.720      0.895
 ```
 
-Test if `haemoplasma` is influenced by sloth `species`:
+Test if `hemoplasma` is influenced by sloth `species`:
 ```
-chisq.test(table(data_haemoplasma$haemoplasma, data_haemoplasma$species))
+chisq.test(table(data_hemoplasma$hemoplasma, data_hemoplasma$species))
 ```
 
 Results are:
 ```
 Pearson's Chi-squared test with Yates' continuity correction
-data:  table(data_haemoplasma$haemoplasma, data_haemoplasma$species)
+data:  table(data_hemoplasma$hemoplasma, data_hemoplasma$species)
 X-squared = 105.27, df = 1, p-value < 2.2e-16
 ```
 
-## Step 4. Test whether haemoplasma infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and other blood parasites (GLM model 1)
+## Step 4. Test whether hemoplasma infection prevalence in _Bradypus tridactylus_ (Bt) is influenced by sex, age, season, ticks and other blood parasites (GLM model 1)
 Create a subset `data_Bt` containing only records for _Bradypus tridactylus_ (Bt):
 
 ```
-data_Bt <- subset(data_haemoplasma, species == "Bt")
+data_Bt <- subset(data_hemoplasma, species == "Bt")
 ```
 
-Fit a GLM to test whether `haemoplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
+Fit a GLM to test whether `hemoplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
 ```
-model_1 <- glm(haemoplasma ~ sex * age * season * tick * bloodparasite, data = data_Bt, family = binomial)
+model_1 <- glm(hemoplasma ~ sex * age * season * tick * bloodparasite, data = data_Bt, family = binomial)
 ```
 
-Fit a GLM to test whether `haemoplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
+Fit a GLM to test whether `hemoplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Bt:
 ```
-model_1a <- glm(haemoplasma ~ sex + age + season + tick + bloodparasite, data = data_Bt, family = binomial)
+model_1a <- glm(hemoplasma ~ sex + age + season + tick + bloodparasite, data = data_Bt, family = binomial)
 ```
 
 Compare the additive model (model_1a) to the interaction model (model_1) using a likelihood ratio test:
@@ -135,8 +135,8 @@ anova(model_1a, model_1, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ sex + age + season + tick + bloodparasite
-Model 2: haemoplasma ~ sex * age * season * tick * bloodparasite
+Model 1: hemoplasma ~ sex + age + season + tick + bloodparasite
+Model 2: hemoplasma ~ sex * age * season * tick * bloodparasite
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        86     25.402                     
 2        74     19.733 12   5.6681   0.9319
@@ -162,7 +162,7 @@ res <- drop1(model_1a, test = "Chisq")
 Results are:
 ```
 Single term deletions
-Model: haemoplasma ~ sex + age + season + tick + bloodparasite
+Model: hemoplasma ~ sex + age + season + tick + bloodparasite
               Df Deviance    AIC    LRT Pr(>Chi)  
 <none>             25.402 37.402                  
 sex            1   25.416 35.416 0.0144  0.90461  
@@ -192,12 +192,12 @@ bloodparasite 37.707   0.30503
 
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
-model_null <- glm(haemoplasma ~ 1, data = data_Bt, family = binomial)
-model_sex <- glm(haemoplasma ~ sex, data = data_Bt, family = binomial)
-model_age <- glm(haemoplasma ~ age, data = data_Bt, family = binomial)
-model_season <- glm(haemoplasma ~ season, data = data_Bt, family = binomial)
-model_tick <- glm(haemoplasma ~ tick, data = data_Bt, family = binomial)
-model_bloodparasite <- glm(haemoplasma ~ bloodparasite, data = data_Bt, family = binomial)
+model_null <- glm(hemoplasma ~ 1, data = data_Bt, family = binomial)
+model_sex <- glm(hemoplasma ~ sex, data = data_Bt, family = binomial)
+model_age <- glm(hemoplasma ~ age, data = data_Bt, family = binomial)
+model_season <- glm(hemoplasma ~ season, data = data_Bt, family = binomial)
+model_tick <- glm(hemoplasma ~ tick, data = data_Bt, family = binomial)
+model_bloodparasite <- glm(hemoplasma ~ bloodparasite, data = data_Bt, family = binomial)
 anova(model_null, model_sex, test="Chisq")
 anova(model_null, model_age, test="Chisq")
 anova(model_null, model_season, test="Chisq")
@@ -212,34 +212,34 @@ print(aics[, c("AIC", "delta_AIC_vs_null")])
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ sex
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        91     32.907                     
 2        90     32.890  1 0.017826   0.8938
 > anova(model_null, model_age, test="Chisq")
 ---
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ age
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ age
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        91     32.907                     
 2        90     32.450  1  0.45735   0.4989
 > anova(model_null, model_season, test="Chisq")
 ---
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ season
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ season
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        91     32.907                       
 2        90     29.111  1   3.7967  0.05135 .
 ---
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ tick
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ tick
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        91     32.907                     
 2        90     31.659  1   1.2483   0.2639
 ---
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ bloodparasite
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ bloodparasite
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        91     32.907                     
 2        90     31.430  1   1.4775   0.2242
@@ -253,18 +253,18 @@ model_tick          35.65919         0.7517249
 model_bloodparasite 35.42993         0.5224647
 ```
 
-Tests for associations between `haemoplasma` and the presence of blood parasites (`anaplasma`, `microfilaria`, `trypanosome`, `babesia`) considered separately in Bt:
+Tests for associations between `hemoplasma` and the presence of blood parasites (`anaplasma`, `microfilaria`, `trypanosome`, `babesia`) considered separately in Bt:
 ```
-fisher.test(table(data_Bt$haemoplasma, data_Bt$anaplasma))
-fisher.test(table(data_Bt$haemoplasma, data_Bt$microfilaria))  
-fisher.test(table(data_Bt$haemoplasma, data_Bt$trypanosome))  
-fisher.test(table(data_Bt$haemoplasma, data_Bt$babesia))
+fisher.test(table(data_Bt$hemoplasma, data_Bt$anaplasma))
+fisher.test(table(data_Bt$hemoplasma, data_Bt$microfilaria))  
+fisher.test(table(data_Bt$hemoplasma, data_Bt$trypanosome))  
+fisher.test(table(data_Bt$hemoplasma, data_Bt$babesia))
 ```
 
 Results are:
 ```
 Fisher's Exact Test for Count Data
-data:  table(data_Bt$haemoplasma, data_Bt$anaplasma)
+data:  table(data_Bt$hemoplasma, data_Bt$anaplasma)
 p-value = 0.6245
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -273,7 +273,7 @@ sample estimates:
 odds ratio 
   0.575116 
 ---
-data:  table(data_Bt$haemoplasma, data_Bt$microfilaria)
+data:  table(data_Bt$hemoplasma, data_Bt$microfilaria)
 p-value = 0.2962
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -282,7 +282,7 @@ sample estimates:
 odds ratio 
          0 
 ---
-data:  table(data_Bt$haemoplasma, data_Bt$trypanosome)
+data:  table(data_Bt$hemoplasma, data_Bt$trypanosome)
 p-value = 1
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -291,7 +291,7 @@ sample estimates:
 odds ratio 
          0 
 ---
-data:  table(data_Bt$haemoplasma, data_Bt$babesia)
+data:  table(data_Bt$hemoplasma, data_Bt$babesia)
 p-value = 1
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -301,10 +301,10 @@ odds ratio
          0 
 ```
 
-Display the proportion of Bt sloths infected by `haemoplasma` in wet and dry `season`:
+Display the proportion of Bt sloths infected by `hemoplasma` in wet and dry `season`:
 ```
-table_haemoplasma_season_Bt <- table(data_Bt$haemoplasma, data_Bt$season)
-table_haemoplasma_season_Bt
+table_hemoplasma_season_Bt <- table(data_Bt$hemoplasma, data_Bt$season)
+table_hemoplasma_season_Bt
 ```
 
 Results are:
@@ -314,15 +314,15 @@ Results are:
   1  0  4
 ```
 
-Tests for associations between `haemoplasma` and `season` in Bt:
+Tests for associations between `hemoplasma` and `season` in Bt:
 ```
-fisher.test(table(data_Bt$haemoplasma, data_Bt$season))  
+fisher.test(table(data_Bt$hemoplasma, data_Bt$season))  
 ```
 
 Results are:
 ```
 Fisher's Exact Test for Count Data
-data:  table(data_Bt$haemoplasma, data_Bt$season)
+data:  table(data_Bt$hemoplasma, data_Bt$season)
 p-value = 0.2927
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -332,21 +332,21 @@ odds ratio
        Inf 
 ```
 
-## Step 5. Test whether haemoplasma infection prevalence in _Choloepus didactylus_ (Cd) is influenced by sex, age, season, ticks and other blood parasites (GLM model 2)
+## Step 5. Test whether hemoplasma infection prevalence in _Choloepus didactylus_ (Cd) is influenced by sex, age, season, ticks and other blood parasites (GLM model 2)
 
 Create a subset `data_Cd` containing only records for _Choloepus didactylus_ (Cd):
 ```
-data_Cd <- subset(data_haemoplasma, species == "Cd")
+data_Cd <- subset(data_hemoplasma, species == "Cd")
 ```
 
-Fit a GLM to test whether `haemoplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Cd:
+Fit a GLM to test whether `hemoplasma` is influenced by interactions among `sex`, `age`, `season`, `tick`, and `bloodparasite` in Cd:
 ```
-model_2 <- glm(haemoplasma ~ sex * age * season * tick * bloodparasite, data = data_Cd, family = binomial)
+model_2 <- glm(hemoplasma ~ sex * age * season * tick * bloodparasite, data = data_Cd, family = binomial)
 ```
 
-Fit a GLM to test whether `haemoplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Cd:
+Fit a GLM to test whether `hemoplasma` infection prevalence is influenced by additive effects of `sex`, `age`, `season`, `tick`, and `bloodparasite` in Cd:
 ```
-model_2a <- glm(haemoplasma ~ sex + age + season + tick + bloodparasite, data = data_Cd, family = binomial)
+model_2a <- glm(hemoplasma ~ sex + age + season + tick + bloodparasite, data = data_Cd, family = binomial)
 ```
 
 Compare the additive model (model_2a) to the interaction model (model_2) using a likelihood ratio test:
@@ -357,8 +357,8 @@ anova(model_2a, model_2, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ sex + age + season + tick + bloodparasite
-Model 2: haemoplasma ~ sex * age * season * tick * bloodparasite
+Model 1: hemoplasma ~ sex + age + season + tick + bloodparasite
+Model 2: hemoplasma ~ sex * age * season * tick * bloodparasite
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        77     67.088                     
 2        57     46.644 20   20.445   0.4304
@@ -384,7 +384,7 @@ res <- drop1(model_2a, test = "Chisq")
 Results are:
 ```
 Single term deletions
-Model: haemoplasma ~ sex + age + season + tick + bloodparasite
+Model: hemoplasma ~ sex + age + season + tick + bloodparasite
               Df Deviance    AIC    LRT Pr(>Chi)  
 <none>             67.088 79.088                  
 sex            1   67.094 77.094 0.0058  0.93954  
@@ -414,12 +414,12 @@ bloodparasite 81.140   2.05144
 
 Compare the null model (model2_null) to univariate models using likelihood ratio tests and AIC:
 ```
-model2_null <- glm(haemoplasma ~ 1, data = data_Cd, family = binomial)
-model2_sex <- glm(haemoplasma ~ sex, data = data_Cd, family = binomial)
-model2_age <- glm(haemoplasma ~ age, data = data_Cd, family = binomial)
-model2_season <- glm(haemoplasma ~ season, data = data_Cd, family = binomial)
-model2_tick <- glm(haemoplasma ~ tick, data = data_Cd, family = binomial)
-model2_bloodparasite <- glm(haemoplasma ~ bloodparasite, data = data_Cd, family = binomial)
+model2_null <- glm(hemoplasma ~ 1, data = data_Cd, family = binomial)
+model2_sex <- glm(hemoplasma ~ sex, data = data_Cd, family = binomial)
+model2_age <- glm(hemoplasma ~ age, data = data_Cd, family = binomial)
+model2_season <- glm(hemoplasma ~ season, data = data_Cd, family = binomial)
+model2_tick <- glm(hemoplasma ~ tick, data = data_Cd, family = binomial)
+model2_bloodparasite <- glm(hemoplasma ~ bloodparasite, data = data_Cd, family = binomial)
 anova(model2_null, model2_sex, test="Chisq")
 anova(model2_null, model2_age, test="Chisq")
 anova(model2_null, model2_season, test="Chisq")
@@ -434,36 +434,36 @@ print(aics[, c("AIC", "delta_AIC_vs_null")])
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ sex
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        82     78.433                     
 2        81     77.984  1  0.44913   0.5027
 ---
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ age
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ age
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        82     78.433                     
 2        81     78.149  1   0.2835   0.5944
 ---
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ season
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ season
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        82     78.433                       
 2        81     73.855  1   4.5779  0.03239 *
 ---
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ tick
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ tick
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        82     78.433                       
 2        81     75.076  1   3.3566  0.06694 .
 ---
 Analysis of Deviance Table
-Model 1: haemoplasma ~ 1
-Model 2: haemoplasma ~ bloodparasite
+Model 1: hemoplasma ~ 1
+Model 2: hemoplasma ~ bloodparasite
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        82     78.433                       
 2        81     73.490  1   4.9434  0.02619 *
@@ -477,18 +477,18 @@ model2_tick          79.07643         -1.356560
 model2_bloodparasite 77.48955         -2.943435
 ```
 
-Tests for associations between `haemoplasma` and the presence of blood parasites (`anaplasma`, `microfilaria`, `trypanosome`, `babesia`) considered separately in Cd:
+Tests for associations between `hemoplasma` and the presence of blood parasites (`anaplasma`, `microfilaria`, `trypanosome`, `babesia`) considered separately in Cd:
 ```
-fisher.test(table(data_Cd$haemoplasma, data_Cd$anaplasma))
-fisher.test(table(data_Cd$haemoplasma, data_Cd$microfilaria))  
-fisher.test(table(data_Cd$haemoplasma, data_Cd$trypanosome))  
-fisher.test(table(data_Cd$haemoplasma, data_Cd$babesia))
+fisher.test(table(data_Cd$hemoplasma, data_Cd$anaplasma))
+fisher.test(table(data_Cd$hemoplasma, data_Cd$microfilaria))  
+fisher.test(table(data_Cd$hemoplasma, data_Cd$trypanosome))  
+fisher.test(table(data_Cd$hemoplasma, data_Cd$babesia))
 ```
 
 Results are:
 ```
 Fisher's Exact Test for Count Data
-data:  table(data_Cd$haemoplasma, data_Cd$anaplasma)
+data:  table(data_Cd$hemoplasma, data_Cd$anaplasma)
 p-value = 0.02172
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -497,7 +497,7 @@ sample estimates:
 odds ratio 
   4.689964 
 ---
-data:  table(data_Cd$haemoplasma, data_Cd$microfilaria)
+data:  table(data_Cd$hemoplasma, data_Cd$microfilaria)
 p-value = 0.4456
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -506,7 +506,7 @@ sample estimates:
 odds ratio 
   2.969683 
 ---
-data:  table(data_Cd$haemoplasma, data_Cd$trypanosome)
+data:  table(data_Cd$hemoplasma, data_Cd$trypanosome)
 p-value = 0.3306
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -515,7 +515,7 @@ sample estimates:
 odds ratio 
  0.2146914 
 ---
-data:  table(data_Cd$haemoplasma, data_Cd$babesia)
+data:  table(data_Cd$hemoplasma, data_Cd$babesia)
 p-value = 1
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -525,36 +525,36 @@ odds ratio
   1.350276 
 ```
 
-Display the proportion of Cd sloths infected by `haemoplasma` and `bloodparasite`:
+Display the proportion of Cd sloths infected by `hemoplasma` and `bloodparasite`:
 ```
-table_haemoplasma_bloodparasite_Cd <- table(data_Cd$haemoplasma, data_Cd$bloodparasite)
-table_haemoplasma_bloodparasite_Cd
+table_hemoplasma_bloodparasite_Cd <- table(data_Cd$hemoplasma, data_Cd$bloodparasite)
+table_hemoplasma_bloodparasite_Cd
 ```
 
 Results are:
 ```
 bloodparasite   0  1
-haemoplasma  0 10  5
+hemoplasma  0 10  5
              1 24 44
 ```
 
-Display the proportion of Cd sloths infected by `haemoplasma` in `anaplasma`:
+Display the proportion of Cd sloths infected by `hemoplasma` in `anaplasma`:
 ```
-table_haemoplasma_anaplasma_Cd <- table(data_Cd$haemoplasma, data_Cd$anaplasma)
-table_haemoplasma_anaplasma_Cd
+table_hemoplasma_anaplasma_Cd <- table(data_Cd$hemoplasma, data_Cd$anaplasma)
+table_hemoplasma_anaplasma_Cd
 ```
 
 Results are:
 ```
 anaplasma        0  1
-haemoplasma   0 12  3
+hemoplasma   0 12  3
               1 31 37
 ```
 
-Display the proportion of Cd sloths infected by `haemoplasma` in wet and dry `season`:
+Display the proportion of Cd sloths infected by `hemoplasma` in wet and dry `season`:
 ```
-table_haemoplasma_season_Cd <- table(data_Cd$haemoplasma, data_Cd$season)
-table_haemoplasma_season_Cd
+table_hemoplasma_season_Cd <- table(data_Cd$hemoplasma, data_Cd$season)
+table_hemoplasma_season_Cd
 ```
 
 Results are:
@@ -564,15 +564,15 @@ Results are:
   1 47 21
 ```
 
-Tests for associations between `haemoplasma` and `season` in Cd:
+Tests for associations between `hemoplasma` and `season` in Cd:
 ```
-fisher.test(table(data_Cd$haemoplasma, data_Cd$season))  
+fisher.test(table(data_Cd$hemoplasma, data_Cd$season))  
 ```
 
 Results are:
 ```
 Fisher's Exact Test for Count Data
-data:  table(data_Cd$haemoplasma, data_Cd$season)
+data:  table(data_Cd$hemoplasma, data_Cd$season)
 p-value = 0.06059
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -584,9 +584,9 @@ odds ratio
 
 ATTENTION ESSAI A GARDER OU PAS
 
-Fit a GLM to test whether `haemoplasma` infection prevalence is influenced by additive effects of `anaplasma` and `season` in Cd:
+Fit a GLM to test whether `hemoplasma` infection prevalence is influenced by additive effects of `anaplasma` and `season` in Cd:
 ```
-model_2b <- glm(haemoplasma ~ anaplasma + season, data = data_Cd, family = binomial)
+model_2b <- glm(hemoplasma ~ anaplasma + season, data = data_Cd, family = binomial)
 ```
 
 Compare model_2b to the complete additive model (model_2a) using a likelihood ratio test:
@@ -597,8 +597,8 @@ anova(model_2b, model_2a, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ anaplasma + season
-Model 2: haemoplasma ~ sex + age + season + tick + bloodparasite
+Model 1: hemoplasma ~ anaplasma + season
+Model 2: hemoplasma ~ sex + age + season + tick + bloodparasite
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        80     69.017                     
 2        77     67.088  3    1.929   0.5873
@@ -625,7 +625,7 @@ Results are:
 ```
 Single term deletions
 Model:
-haemoplasma ~ anaplasma + season
+hemoplasma ~ anaplasma + season
           Df Deviance    AIC    LRT Pr(>Chi)  
 <none>         69.017 75.017                  
 anaplasma  1   73.855 77.855 4.8377  0.02784 *
@@ -647,9 +647,9 @@ anaplasma 77.855    2.8377
 season    76.229    1.2117
 ```
 
-Compare the the model_2b additive model (haemoplasma ~ anaplasma + season) to the model2_anaplasma univariate model (haemoplasma ~ anaplasma) using likelihood ratio tests and AIC:
+Compare the the model_2b additive model (hemoplasma ~ anaplasma + season) to the model2_anaplasma univariate model (hemoplasma ~ anaplasma) using likelihood ratio tests and AIC:
 ```
-model2_anaplasma <- glm(haemoplasma ~ anaplasma, data = data_Cd, family = binomial)
+model2_anaplasma <- glm(hemoplasma ~ anaplasma, data = data_Cd, family = binomial)
 anova(model_2b, model2_anaplasma, test="Chisq")
 aics <- AIC(model_2b, model2_anaplasma)
 aic_null <- aics["model_2b", "AIC"]
@@ -660,8 +660,8 @@ print(aics[, c("AIC", "delta_AIC_vs_null")])
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ anaplasma + season
-Model 2: haemoplasma ~ anaplasma
+Model 1: hemoplasma ~ anaplasma + season
+Model 2: hemoplasma ~ anaplasma
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        80     69.017                       
 2        81     72.229 -1  -3.2117  0.07311 .
@@ -671,7 +671,7 @@ model_2b         75.01733          0.000000
 model2_anaplasma 76.22900          1.211667
 ```
 
-Compare the the model2_anaplasma univariate model (haemoplasma ~ anaplasma) to the null model using likelihood ratio tests and AIC:
+Compare the the model2_anaplasma univariate model (hemoplasma ~ anaplasma) to the null model using likelihood ratio tests and AIC:
 ```
 anova(model2_anaplasma, model2_null, test="Chisq")
 aics <- AIC(model2_anaplasma, model2_null)
@@ -683,8 +683,8 @@ print(aics[, c("AIC", "delta_AIC_vs_null")])
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: haemoplasma ~ anaplasma
-Model 2: haemoplasma ~ 1
+Model 1: hemoplasma ~ anaplasma
+Model 2: hemoplasma ~ 1
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
 1        81     72.229                       
 2        82     78.433 -1   -6.204  0.01275 *
@@ -708,14 +708,14 @@ L0 <- mean(data_adult_Bt$total_length, na.rm = TRUE)
 data_adult_Bt$SMI <- data_adult_Bt$weight * (L0 / data_adult_Bt$total_length)^b
 ```
 
-Fit a GLM to test whether SMI is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex` and `season` in Bt:
+Fit a GLM to test whether SMI is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex` and `season` in Bt:
 ```
-model_3 <- glm(SMI ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_3 <- glm(SMI ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex` and `season` in Bt:
+Fit a GLM to test whether SMI is influenced by additive effects of `hemoplasma`, `bloodparasite`, `sex` and `season` in Bt:
 ```
-model_3a <- glm(SMI ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_3a <- glm(SMI ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_3a) to the interaction model (model_3) using a likelihood ratio test:
@@ -726,8 +726,8 @@ anova(model_3a, model_3, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + bloodparasite + season + sex
-Model 2: SMI ~ haemoplasma * bloodparasite * season * sex
+Model 1: SMI ~ hemoplasma + bloodparasite + season + sex
+Model 2: SMI ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        78     23.641                     
 2        73     22.818  5  0.82298   0.7564
@@ -754,10 +754,10 @@ Results are:
 ```
 Single term deletions
 Model:
-SMI ~ haemoplasma + bloodparasite + season + sex
+SMI ~ hemoplasma + bloodparasite + season + sex
               Df Deviance    AIC scaled dev.  Pr(>Chi)    
 <none>             23.641 143.31                          
-haemoplasma    1   26.804 151.73     10.4232 0.0012444 ** 
+hemoplasma    1   26.804 151.73     10.4232 0.0012444 ** 
 bloodparasite  1   23.642 141.31      0.0045 0.9463824    
 season         1   23.655 141.36      0.0515 0.8205475    
 sex            1   27.489 153.82     12.5176 0.0004031 ***
@@ -774,7 +774,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        143.31    0.0000
-haemoplasma   151.73    8.4232
+hemoplasma   151.73    8.4232
 bloodparasite 141.31   -1.9955
 season        141.36   -1.9485
 sex           153.82   10.5176
@@ -783,15 +783,15 @@ sex           153.82   10.5176
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model3_null <- glm(SMI ~ 1, data = data_adult_Bt, family = gaussian(link = "identity"))
-model3_haemoplasma <- glm(SMI ~ haemoplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
+model3_hemoplasma <- glm(SMI ~ hemoplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
 model3_bloodparasite <- glm(SMI ~ bloodparasite, data = data_adult_Bt, family = gaussian(link = "identity"))
 model3_season <- glm(SMI ~ season, data = data_adult_Bt, family = gaussian(link = "identity"))
 model3_sex <- glm(SMI ~ sex, data = data_adult_Bt, family = gaussian(link = "identity"))
-anova(model3_null, model3_haemoplasma, test="Chisq")
+anova(model3_null, model3_hemoplasma, test="Chisq")
 anova(model3_null, model3_bloodparasite, test="Chisq")
 anova(model3_null, model3_season, test="Chisq")
 anova(model3_null, model3_sex, test="Chisq")
-aics <- AIC(model3_null, model3_haemoplasma, model3_bloodparasite, model3_season, model3_sex)
+aics <- AIC(model3_null, model3_hemoplasma, model3_bloodparasite, model3_season, model3_sex)
 aic_null <- aics["model3_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -801,7 +801,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: SMI ~ 1
-Model 2: SMI ~ haemoplasma
+Model 2: SMI ~ hemoplasma
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)   
 1        82     30.838                        
 2        81     27.594  1   3.2438 0.002031 **
@@ -829,15 +829,15 @@ Model 2: SMI ~ sex
 ---
                           AIC delta_AIC_vs_null
 model3_null          157.3666          0.000000
-model3_haemoplasma   150.1419         -7.224666
+model3_hemoplasma   150.1419         -7.224666
 model3_bloodparasite 158.6243          1.257743
 model3_season        159.3430          1.976398
 model3_sex           147.9681         -9.398467
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma` and `sex` in Bt:
+Fit a GLM to test whether SMI is influenced by additive effects of `hemoplasma` and `sex` in Bt:
 ```
-model_3b <- glm(SMI ~ haemoplasma + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_3b <- glm(SMI ~ hemoplasma + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_3b) to the full additive model (model_3a) using a likelihood ratio test:
@@ -848,8 +848,8 @@ anova(model_3b, model_3a, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + sex
-Model 2: SMI ~ haemoplasma + bloodparasite + season + sex
+Model 1: SMI ~ hemoplasma + sex
+Model 2: SMI ~ hemoplasma + bloodparasite + season + sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        80     23.657                     
 2        78     23.641  2 0.015892   0.9741
@@ -867,30 +867,30 @@ model_3a  6 143.3069
 model_3b  4 139.3626
 ```
 
-Compare the the model3_haemoplasma univariate model (SMI ~ haemoplasma) to the the 'haemoplasma' + 'sex' additive model (model_3b) using likelihood ratio tests and AIC:
+Compare the the model3_hemoplasma univariate model (SMI ~ hemoplasma) to the the 'hemoplasma' + 'sex' additive model (model_3b) using likelihood ratio tests and AIC:
 ```
-anova(model_3b, model3_haemoplasma, test="Chisq")
-aics <- AIC(model_3b, model3_haemoplasma)
-aic_haemoplasma <- aics["model3_haemoplasma", "AIC"]
-aics$delta_AIC_vs_haemoplasma <- aics$AIC - aic_haemoplasma
-print(aics[, c("AIC", "delta_AIC_vs_haemoplasma")])
+anova(model_3b, model3_hemoplasma, test="Chisq")
+aics <- AIC(model_3b, model3_hemoplasma)
+aic_hemoplasma <- aics["model3_hemoplasma", "AIC"]
+aics$delta_AIC_vs_hemoplasma <- aics$AIC - aic_hemoplasma
+print(aics[, c("AIC", "delta_AIC_vs_hemoplasma")])
 ```
 
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + sex
-Model 2: SMI ~ haemoplasma
+Model 1: SMI ~ hemoplasma + sex
+Model 2: SMI ~ hemoplasma
   Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
 1        80     23.657                          
 2        81     27.594 -1  -3.9377 0.0002631 ***
 ---
-                        AIC delta_AIC_vs_haemoplasma
+                        AIC delta_AIC_vs_hemoplasma
 model_3b           139.3626                -10.77931
-model3_haemoplasma 150.1419                  0.00000
+model3_hemoplasma 150.1419                  0.00000
 ```
 
-Compare the the model3_sex univariate model (SMI ~ sex) to the 'haemoplasma' + 'sex' additive model (model_3b) using likelihood ratio tests and AIC:
+Compare the the model3_sex univariate model (SMI ~ sex) to the 'hemoplasma' + 'sex' additive model (model_3b) using likelihood ratio tests and AIC:
 ```
 anova(model_3b, model3_sex, test="Chisq")
 aics <- AIC(model_3b, model3_sex)
@@ -902,7 +902,7 @@ print(aics[, c("AIC", "delta_AIC_vs_sex")])
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + sex
+Model 1: SMI ~ hemoplasma + sex
 Model 2: SMI ~ sex
   Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
 1        80     23.657                          
@@ -913,9 +913,9 @@ model_3b   139.3626        -8.605512
 model3_sex 147.9681         0.000000
 ```
 
-Fit a GLM to test whether SMI is influenced by interaction effect of `haemoplasma` and `sex` in Bt:
+Fit a GLM to test whether SMI is influenced by interaction effect of `hemoplasma` and `sex` in Bt:
 ```
-model_3c <- glm(SMI ~ haemoplasma * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_3c <- glm(SMI ~ hemoplasma * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_3b) to the interactive model (model_3c) using a likelihood ratio test:
@@ -926,8 +926,8 @@ anova(model_3c, model_3b, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma * sex
-Model 2: SMI ~ haemoplasma + sex
+Model 1: SMI ~ hemoplasma * sex
+Model 2: SMI ~ hemoplasma + sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        79     23.647                     
 2        80     23.657 -1 -0.00961   0.8578
@@ -945,7 +945,7 @@ model_3b  4 139.3626
 model_3c  5 141.3289
 ```
 
-Assess residual normality and heteroscedasticity of the 'haemoplasma' + 'sex' additive model (model_3b):
+Assess residual normality and heteroscedasticity of the 'hemoplasma' + 'sex' additive model (model_3b):
 ```
 shapiro.test(model_3b$residuals)
 bptest(model_3b)
@@ -962,10 +962,10 @@ data:  model_3b
 BP = 4.0982, df = 2, p-value = 0.1288
 ```
 
-Calculation of mean and standard error of SMI by `haemoplasma` infection status and `sex` for Bt:
+Calculation of mean and standard error of SMI by `hemoplasma` infection status and `sex` for Bt:
 ```
 data_adult_Bt %>% 
-  group_by(sex, haemoplasma) %>% 
+  group_by(sex, hemoplasma) %>% 
   summarise(
     n = sum(!is.na(SMI)),
     mean = mean(SMI, na.rm = TRUE),
@@ -977,7 +977,7 @@ data_adult_Bt %>%
 
 Results are:
 ```
-  sex   haemoplasma     n  mean     se SMI        
+  sex   hemoplasma     n  mean     se SMI        
   <fct> <fct>       <int> <dbl>  <dbl> <chr>      
 1 F     0              39  4.43 0.0749 4.43 ± 0.07
 2 F     1               2  3.56 0.0284 3.56 ± 0.03
@@ -994,10 +994,10 @@ clean_data <- data_adult_Bt %>%
   ) %>%
   mutate(
     sex_infect = case_when(
-      sex == "M" & haemoplasma == 0 ~ "Male, uninfected",
-      sex == "M" & haemoplasma == 1 ~ "Male, infected",
-      sex == "F" & haemoplasma == 0 ~ "Female, uninfected",
-      sex == "F" & haemoplasma == 1 ~ "Female, infected",
+      sex == "M" & hemoplasma == 0 ~ "Male, uninfected",
+      sex == "M" & hemoplasma == 1 ~ "Male, infected",
+      sex == "F" & hemoplasma == 0 ~ "Female, uninfected",
+      sex == "F" & hemoplasma == 1 ~ "Female, infected",
       TRUE ~ NA_character_
     )
   )
@@ -1038,7 +1038,7 @@ ggplot() +
   ) +
   scale_fill_brewer(palette = "Green", name = "SMI level") +
   scale_shape_manual(
-    name = expression(paste("Haemoplasma", " infection status")),
+    name = expression(paste("Hemoplasma", " infection status")),
     values = c(
       "Male, uninfected" = 0,
       "Male, infected" = 12,
@@ -1075,14 +1075,14 @@ L0 <- mean(data_adult_Cd$total_length, na.rm = TRUE)
 data_adult_Cd$SMI <- data_adult_Cd$weight * (L0 / data_adult_Cd$total_length)^b
 ```
 
-Fit a GLM to test whether SMI is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_4 <- glm(SMI ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4 <- glm(SMI ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by additive effects of `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_4a <- glm(SMI ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4a <- glm(SMI ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_4a) to the interaction model (model_4) using a likelihood ratio test:
@@ -1093,8 +1093,8 @@ anova(model_4a, model_4, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + bloodparasite + season + sex
-Model 2: SMI ~ haemoplasma * bloodparasite * season * sex
+Model 1: SMI ~ hemoplasma + bloodparasite + season + sex
+Model 2: SMI ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        52     27.506                     
 2        45     25.399  7    2.106   0.8102
@@ -1121,10 +1121,10 @@ Results are:
 ```
 Single term deletions
 Model:
-SMI ~ haemoplasma + bloodparasite + season + sex
+SMI ~ hemoplasma + bloodparasite + season + sex
               Df Deviance    AIC scaled dev. Pr(>Chi)  
 <none>             27.506 132.22                       
-haemoplasma    1   27.514 130.24      0.0178  0.89379  
+hemoplasma    1   27.514 130.24      0.0178  0.89379  
 bloodparasite  1   30.401 135.93      5.7058  0.01691 *
 season         1   27.725 130.68      0.4539  0.50048  
 sex            1   27.625 130.47      0.2465  0.61958  
@@ -1141,7 +1141,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        132.22    0.0000
-haemoplasma   130.24   -1.9822
+hemoplasma   130.24   -1.9822
 bloodparasite 135.93    3.7058
 season        130.68   -1.5461
 sex           130.47   -1.7535
@@ -1150,15 +1150,15 @@ sex           130.47   -1.7535
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model4_null <- glm(SMI ~ 1, data = data_adult_Cd, family = gaussian(link = "identity"))
-model4_haemoplasma <- glm(SMI ~ haemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model4_hemoplasma <- glm(SMI ~ hemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
 model4_bloodparasite <- glm(SMI ~ bloodparasite, data = data_adult_Cd, family = gaussian(link = "identity"))
 model4_season <- glm(SMI ~ season, data = data_adult_Cd, family = gaussian(link = "identity"))
 model4_sex <- glm(SMI ~ sex, data = data_adult_Cd, family = gaussian(link = "identity"))
-anova(model4_null, model4_haemoplasma, test="Chisq")
+anova(model4_null, model4_hemoplasma, test="Chisq")
 anova(model4_null, model4_bloodparasite, test="Chisq")
 anova(model4_null, model4_season, test="Chisq")
 anova(model4_null, model4_sex, test="Chisq")
-aics <- AIC(model4_null, model4_haemoplasma, model4_bloodparasite, model4_season, model4_sex)
+aics <- AIC(model4_null, model4_hemoplasma, model4_bloodparasite, model4_season, model4_sex)
 aic_null <- aics["model4_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1168,7 +1168,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: SMI ~ 1
-Model 2: SMI ~ haemoplasma
+Model 2: SMI ~ hemoplasma
   Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
 1        56     30.572                      
 2        55     30.571  1 0.0004533   0.9772
@@ -1196,7 +1196,7 @@ Model 2: SMI ~ sex
 ---
 AIC delta_AIC_vs_null
 model4_null          130.2494          0.000000
-model4_haemoplasma   132.2486          1.999155
+model4_hemoplasma   132.2486          1.999155
 model4_bloodparasite 127.1041         -3.145367
 model4_season        131.9687          1.719234
 model4_sex           132.2171          1.967676
@@ -1221,7 +1221,7 @@ BP = 0.37341, df = 1, p-value = 0.5412
 
 Post hoc power analyses for SMI tests in Cd (for full interaction model):
 ```
-n <- nrow(na.omit(data_adult_Cd[, c("SMI", "haemoplasma", "bloodparasite", "season", "sex")]))
+n <- nrow(na.omit(data_adult_Cd[, c("SMI", "hemoplasma", "bloodparasite", "season", "sex")]))
 k <- 15
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.30, sig.level = 0.05)
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
@@ -1244,9 +1244,9 @@ sig.level = 0.05
 power = 0.3970745
 ```
 
-Post hoc power analyses for SMI tests in Cd (for `SMI` ~ `bloodparasite` and adding `haemoplasma`):
+Post hoc power analyses for SMI tests in Cd (for `SMI` ~ `bloodparasite` and adding `hemoplasma`):
 ```
-n <- nrow(na.omit(data_adult_Cd[, c("SMI", "bloodparasite" "haemoplasma")]))
+n <- nrow(na.omit(data_adult_Cd[, c("SMI", "bloodparasite" "hemoplasma")]))
 k <- 3
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.30, sig.level = 0.05)
 pwr.f2.test(u = k, v = n - k - 1, f2 = 0.20, sig.level = 0.05)
@@ -1271,14 +1271,14 @@ power = 0.787044
 
 AUTRE ESSAI BLOODPARASITE EN 1 PAR 1 A VOIR SI GARDER OU PAS
 
-Fit a GLM to test whether SMI is influenced by interactions among `haemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by interactions among `hemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
 ```
-model_4bis <- glm(SMI ~ haemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4bis <- glm(SMI ~ hemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by additive effects of `hemoplasma`, `anaplasma`, `microfilaria`, `trypanosome`, `babesia`, `sex` and `season` in Cd:
 ```
-model_4bisa <- glm(SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_4bisa <- glm(SMI ~ hemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_4bisa) to the interaction model (model_4bis) using a likelihood ratio test:
@@ -1289,8 +1289,8 @@ anova(model_4bisa, model_4bis, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
-Model 2: SMI ~ haemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex
+Model 1: SMI ~ hemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
+Model 2: SMI ~ hemoplasma * anaplasma * microfilaria * trypanosome * babesia * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        49     28.333                     
 2        34     20.363 15   7.9702   0.5786
@@ -1317,10 +1317,10 @@ Results are:
 ```
 Single term deletions
 Model:
-SMI ~ haemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
+SMI ~ hemoplasma + anaplasma + microfilaria + trypanosome + babesia + season + sex
              Df Deviance    AIC scaled dev. Pr(>Chi)
 <none>            28.333 139.91                     
-haemoplasma   1   28.335 137.92     0.00399   0.9496
+hemoplasma   1   28.335 137.92     0.00399   0.9496
 anaplasma     1   28.885 139.01     1.09981   0.2943
 microfilaria  1   29.568 140.35     2.43203   0.1189
 trypanosome   1   28.452 138.15     0.23902   0.6249
@@ -1340,7 +1340,7 @@ Results are:
 ```
                 AIC delta_AIC
 <none>       139.91   0.00000
-haemoplasma  137.92  -1.99601
+hemoplasma  137.92  -1.99601
 anaplasma    139.01  -0.90019
 microfilaria 140.35   0.43203
 trypanosome  138.15  -1.76098
@@ -1349,7 +1349,7 @@ season       138.54  -1.37213
 sex          138.11  -1.80565
 ```
 
-FIN ESSAI 4bis MAIS IL FAUDRA SANS DOUTE CREER UNE VARIABLE  HAEMOPLASMA + BLOODPARASITE :(
+FIN ESSAI 4bis MAIS IL FAUDRA SANS DOUTE CREER UNE VARIABLE  HemoplasmA + BLOODPARASITE :(
 
 Generate SMI chart for Cd:
 ```
@@ -1360,10 +1360,10 @@ clean_data <- data_adult_Cd %>%
   ) %>%
   mutate(
     sex_infect = case_when(
-      sex == "M" & haemoplasma == 0 ~ "Male, uninfected",
-      sex == "M" & haemoplasma == 1 ~ "Male, infected",
-      sex == "F" & haemoplasma == 0 ~ "Female, uninfected",
-      sex == "F" & haemoplasma == 1 ~ "Female, infected",
+      sex == "M" & hemoplasma == 0 ~ "Male, uninfected",
+      sex == "M" & hemoplasma == 1 ~ "Male, infected",
+      sex == "F" & hemoplasma == 0 ~ "Female, uninfected",
+      sex == "F" & hemoplasma == 1 ~ "Female, infected",
       TRUE ~ NA_character_
     )
   )
@@ -1404,7 +1404,7 @@ ggplot() +
   ) +
   scale_fill_brewer(palette = "YlOrBr", name = "SMI level") +
   scale_shape_manual(
-    name = expression(paste("Haemoplasma", " infection status")),
+    name = expression(paste("Hemoplasma", " infection status")),
     values = c(
       "Male, uninfected" = 0,
       "Male, infected" = 12,
@@ -1433,14 +1433,14 @@ ggplot() +
 
 ## Step 8. Impact of heamoplasma infections on neck circumference (GLM models 5 and 6)
 
-Fit a GLM to test whether neck circumference is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
+Fit a GLM to test whether neck circumference is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_5 <- glm(log(neck_size) ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_5 <- glm(log(neck_size) ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Fit a GLM to test whether SMI is influenced by additive effects of `anaplasma`, `sex`, and `season` in Bt:
 ```
-model_5a <- glm(log(neck_size) ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
+model_5a <- glm(log(neck_size) ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_5a) to the interaction model (model_5) using a likelihood ratio test:
@@ -1451,8 +1451,8 @@ anova(model_5a, model_5, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: log(neck_size) ~ haemoplasma + bloodparasite + season + sex
-Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
+Model 1: log(neck_size) ~ hemoplasma + bloodparasite + season + sex
+Model 2: log(neck_size) ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        56    0.47867                     
 2        52    0.45529  4 0.023386   0.6143
@@ -1480,10 +1480,10 @@ Results are:
 ```
 Single term deletions
 Model:
-log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+log(neck_size) ~ hemoplasma + bloodparasite + season + sex
               Df Deviance     AIC scaled dev. Pr(>Chi)
 <none>            0.47867 -110.59                     
-haemoplasma    1  0.48450 -111.86     0.73846   0.3902
+hemoplasma    1  0.48450 -111.86     0.73846   0.3902
 bloodparasite  1  0.48917 -111.27     1.32339   0.2500
 season         1  0.48060 -112.35     0.24482   0.6207
 sex            1  0.49638 -110.38     2.21631   0.1366
@@ -1500,7 +1500,7 @@ Results are:
 ```
                   AIC delta_AIC
 <none>        -110.59   0.00000
-haemoplasma   -111.86  -1.26154
+hemoplasma   -111.86  -1.26154
 bloodparasite -111.27  -0.67661
 season        -112.35  -1.75518
 sex           -110.38   0.21631
@@ -1509,15 +1509,15 @@ sex           -110.38   0.21631
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model5_null <- glm(log(neck_size) ~ 1, data = data_adult_Bt, family = gaussian(link = "identity"))
-model5_haemoplasma <- glm(log(neck_size) ~ haemoplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
+model5_hemoplasma <- glm(log(neck_size) ~ hemoplasma, data = data_adult_Bt, family = gaussian(link = "identity"))
 model5_bloodparasite <- glm(log(neck_size) ~ bloodparasite, data = data_adult_Bt, family = gaussian(link = "identity"))
 model5_season <- glm(log(neck_size) ~ season, data = data_adult_Bt, family = gaussian(link = "identity"))
 model5_sex <- glm(log(neck_size) ~ sex, data = data_adult_Bt, family = gaussian(link = "identity"))
-anova(model5_null, model5_haemoplasma, test="Chisq")
+anova(model5_null, model5_hemoplasma, test="Chisq")
 anova(model5_null, model5_bloodparasite, test="Chisq")
 anova(model5_null, model5_season, test="Chisq")
 anova(model5_null, model5_sex, test="Chisq")
-aics <- AIC(model5_null, model5_haemoplasma, model5_bloodparasite, model5_season, model5_sex)
+aics <- AIC(model5_null, model5_hemoplasma, model5_bloodparasite, model5_season, model5_sex)
 aic_null <- aics["model5_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1527,7 +1527,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ haemoplasma
+Model 2: log(neck_size) ~ hemoplasma
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        60    0.52778                     
 2        59    0.51330  1 0.014479    0.197
@@ -1554,7 +1554,7 @@ Model 2: log(neck_size) ~ sex
 2        59    0.49900  1 0.028786  0.06505 .
 ---
 model5_null          -112.6360        0.00000000
-model5_haemoplasma   -112.3329        0.30312861
+model5_hemoplasma   -112.3329        0.30312861
 model5_bloodparasite -112.6798       -0.04384486
 model5_season        -111.0596        1.57633716
 model5_sex           -114.0572       -1.42123531
@@ -1572,7 +1572,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
+Model 2: log(neck_size) ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        60    0.52778                     
 2        52    0.45529  8 0.072498   0.4066
@@ -1586,14 +1586,14 @@ data:  model_5b$residuals
 W = 0.96651, p-value = 0.09328
 ```
 
-Fit a GLM to test whether neck circumference is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether neck circumference is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_6 <- glm(log(neck_size) ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_6 <- glm(log(neck_size) ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
-Fit a GLM to test whether SMI is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether SMI is influenced by additive effects of `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_6a <- glm(log(neck_size) ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
+model_6a <- glm(log(neck_size) ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = gaussian(link = "identity"))
 ```
 
 Compare the additive model (model_6a) to the interaction model (model_6) using a likelihood ratio test:
@@ -1604,8 +1604,8 @@ anova(model_6a, model_6, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: log(neck_size) ~ haemoplasma + bloodparasite + season + sex
-Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
+Model 1: log(neck_size) ~ hemoplasma + bloodparasite + season + sex
+Model 2: log(neck_size) ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        43    0.55930                     
 2        36    0.42106  7  0.13824   0.1067
@@ -1632,10 +1632,10 @@ Results are:
 ```
 Single term deletions
 Model:
-log(neck_size) ~ haemoplasma + bloodparasite + season + sex
+log(neck_size) ~ hemoplasma + bloodparasite + season + sex
               Df Deviance     AIC scaled dev. Pr(>Chi)
 <none>            0.55930 -65.491                     
-haemoplasma    1  0.55935 -67.486     0.00426   0.9480
+hemoplasma    1  0.55935 -67.486     0.00426   0.9480
 bloodparasite  1  0.56108 -67.338     0.15253   0.6961
 season         1  0.57932 -65.802     1.68826   0.1938
 sex            1  0.57644 -66.042     1.44873   0.2287
@@ -1652,7 +1652,7 @@ Results are:
 ```
                   AIC delta_AIC
 <none>        -65.491   0.00000
-haemoplasma   -67.486  -1.99574
+hemoplasma   -67.486  -1.99574
 bloodparasite -67.338  -1.84747
 season        -65.802  -0.31174
 sex           -66.042  -0.55127
@@ -1661,15 +1661,15 @@ sex           -66.042  -0.55127
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model6_null <- glm(log(neck_size) ~ 1, data = data_adult_Cd, family = gaussian(link = "identity"))
-model6_haemoplasma <- glm(log(neck_size) ~ haemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
+model6_hemoplasma <- glm(log(neck_size) ~ hemoplasma, data = data_adult_Cd, family = gaussian(link = "identity"))
 model6_bloodparasite <- glm(log(neck_size) ~ bloodparasite, data = data_adult_Cd, family = gaussian(link = "identity"))
 model6_season <- glm(log(neck_size) ~ season, data = data_adult_Cd, family = gaussian(link = "identity"))
 model6_sex <- glm(log(neck_size) ~ sex, data = data_adult_Cd, family = gaussian(link = "identity"))
-anova(model6_null, model6_haemoplasma, test="Chisq")
+anova(model6_null, model6_hemoplasma, test="Chisq")
 anova(model6_null, model6_bloodparasite, test="Chisq")
 anova(model6_null, model6_season, test="Chisq")
 anova(model6_null, model6_sex, test="Chisq")
-aics <- AIC(model6_null, model6_haemoplasma, model6_bloodparasite, model6_season, model6_sex)
+aics <- AIC(model6_null, model6_hemoplasma, model6_bloodparasite, model6_season, model6_sex)
 aic_null <- aics["model6_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1679,7 +1679,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ haemoplasma
+Model 2: log(neck_size) ~ hemoplasma
   Resid. Df Resid. Dev Df  Deviance Pr(>Chi)
 1        47    0.60752                      
 2        46    0.60512  1 0.0024025   0.6691
@@ -1707,7 +1707,7 @@ Model 2: log(neck_size) ~ sex
 ---
                            AIC delta_AIC_vs_null
 model6_null          -69.52144       0.000000000
-model6_haemoplasma   -67.71164       1.809799276
+model6_hemoplasma   -67.71164       1.809799276
 model6_bloodparasite -67.85305       1.668385770
 model6_season        -69.73015      -0.208715492
 model6_sex           -69.52621      -0.004777113
@@ -1725,7 +1725,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: log(neck_size) ~ 1
-Model 2: log(neck_size) ~ haemoplasma * bloodparasite * season * sex
+Model 2: log(neck_size) ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        47    0.60752                     
 2        36    0.42106 11  0.18645   0.1433
@@ -1740,14 +1740,14 @@ W = 0.97242, p-value = 0.3137
 ```
 
 ## Step 9. Impact of _Anaplasma_ infections on hematocrit levels (GLM models 7, 8 and 9)
-Fit a GLM to test whether `hematocrit` is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
+Fit a GLM to test whether `hematocrit` is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_7 <- glm(hematocrit ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = Gamma(link = "log"))
+model_7 <- glm(hematocrit ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Bt, family = Gamma(link = "log"))
 ```
 
-Fit a GLM to test whether `hematocrit` is influenced by additive effects of haemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
+Fit a GLM to test whether `hematocrit` is influenced by additive effects of hemoplasma`, `bloodparasite`, `sex`, and `season` in Bt:
 ```
-model_7a <- glm(hematocrit ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = Gamma(link = "log"))
+model_7a <- glm(hematocrit ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Bt, family = Gamma(link = "log"))
 ```
 
 Compare the additive model (model_7a) to the interaction model (model_7) using a likelihood ratio test:
@@ -1758,8 +1758,8 @@ anova(model_7a, model_7, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: hematocrit ~ haemoplasma + bloodparasite + season + sex
-Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
+Model 1: hematocrit ~ hemoplasma + bloodparasite + season + sex
+Model 2: hematocrit ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        79     1.3166                     
 2        74     1.1985  5  0.11806   0.2065
@@ -1786,10 +1786,10 @@ Results are:
 ```
 Single term deletions
 Model:
-hematocrit ~ haemoplasma + bloodparasite + season + sex
+hematocrit ~ hemoplasma + bloodparasite + season + sex
               Df Deviance    AIC scaled dev. Pr(>Chi)  
 <none>             1.3166 515.75                       
-haemoplasma    1   1.3209 514.00      0.2550  0.61358  
+hemoplasma    1   1.3209 514.00      0.2550  0.61358  
 bloodparasite  1   1.3258 514.29      0.5474  0.45937  
 season         1   1.3238 514.18      0.4285  0.51273  
 sex            1   1.3825 517.67      3.9191  0.04774 *
@@ -1806,7 +1806,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        515.75    0.0000
-haemoplasma   514.00   -1.7450
+hemoplasma   514.00   -1.7450
 bloodparasite 514.29   -1.4526
 season        514.18   -1.5715
 sex           517.67    1.9191
@@ -1815,15 +1815,15 @@ sex           517.67    1.9191
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model7_null <- glm(hematocrit ~ 1, data = data_adult_Bt, family = Gamma(link = "log"))
-model7_haemoplasma <- glm(hematocrit ~ haemoplasma, data = data_adult_Bt, family = Gamma(link = "log"))
+model7_hemoplasma <- glm(hematocrit ~ hemoplasma, data = data_adult_Bt, family = Gamma(link = "log"))
 model7_bloodparasite <- glm(hematocrit ~ bloodparasite, data = data_adult_Bt, family = Gamma(link = "log"))
 model7_season <- glm(hematocrit ~ season, data = data_adult_Bt, family = Gamma(link = "log"))
 model7_sex <- glm(hematocrit ~ sex, data = data_adult_Bt, family = Gamma(link = "log"))
-anova(model7_null, model7_haemoplasma, test="Chisq")
+anova(model7_null, model7_hemoplasma, test="Chisq")
 anova(model7_null, model7_bloodparasite, test="Chisq")
 anova(model7_null, model7_season, test="Chisq")
 anova(model7_null, model7_sex, test="Chisq")
-aics <- AIC(model7_null, model7_haemoplasma, model7_bloodparasite, model7_season, model7_sex)
+aics <- AIC(model7_null, model7_hemoplasma, model7_bloodparasite, model7_season, model7_sex)
 aic_null <- aics["model7_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -1833,7 +1833,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: hematocrit ~ 1
-Model 2: hematocrit ~ haemoplasma
+Model 2: hematocrit ~ hemoplasma
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        83     1.4015                     
 2        82     1.3936  1 0.007882   0.4994
@@ -1861,7 +1861,7 @@ Model 2: hematocrit ~ sex
 ---
                           AIC delta_AIC_vs_null
 model7_null          513.0105          0.000000
-model7_haemoplasma   514.5354          1.524936
+model7_hemoplasma   514.5354          1.524936
 model7_bloodparasite 514.6217          1.611190
 model7_season        514.4722          1.461711
 model7_sex           511.3790         -1.631481
@@ -1878,7 +1878,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: hematocrit ~ 1
-Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
+Model 2: hematocrit ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        83     1.4015                     
 2        74     1.1985  9  0.20297   0.1932
@@ -1895,10 +1895,10 @@ qqnorm(res_dev, main = "QQ Plot (Deviance residuals)")
 qqline(res_dev, col = "red")
 ```
 
-Calculation of mean and standard error of `hematocrit` by `haemoplasma` for Bt:
+Calculation of mean and standard error of `hematocrit` by `hemoplasma` for Bt:
 ```
 data_adult_Bt %>%
-  group_by(haemoplasma) %>%
+  group_by(hemoplasma) %>%
   summarise(
     mean_hematocrit = mean(hematocrit, na.rm = TRUE),
     se_hematocrit = sd(hematocrit, na.rm = TRUE) / sqrt(sum(!is.na(hematocrit)))
@@ -1908,20 +1908,20 @@ data_adult_Bt %>%
 Results are:
 ```
 A tibble: 2 × 3
-  haemoplasma mean_hematocrit se_hematocrit
+  hemoplasma mean_hematocrit se_hematocrit
   <fct>                 <dbl>         <dbl>
 1 0                      39.0         0.569
 2 1                      40.8         3.04 
 ```
 
-Fit a GLM to test whether `hematocrit` is influenced by interactions among `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether `hematocrit` is influenced by interactions among `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_8 <- glm(hematocrit ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = Gamma(link = "log"))
+model_8 <- glm(hematocrit ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Cd, family = Gamma(link = "log"))
 ```
 
-Fit a GLM to test whether `hematocrit` is influenced by additive effects of `haemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
+Fit a GLM to test whether `hematocrit` is influenced by additive effects of `hemoplasma`, `bloodparasite`, `sex`, and `season` in Cd:
 ```
-model_8a <- glm(hematocrit ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = Gamma(link = "log"))
+model_8a <- glm(hematocrit ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Cd, family = Gamma(link = "log"))
 ```
 
 Compare the additive model (model_8a) to the interaction model (model_8) using a likelihood ratio test:
@@ -1932,8 +1932,8 @@ anova(model_8a, model_8, test = "Chisq")
 Results are:
 ```
 Analysis of Deviance Table
-Model 1: hematocrit ~ haemoplasma + bloodparasite + season + sex
-Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
+Model 1: hematocrit ~ hemoplasma + bloodparasite + season + sex
+Model 2: hematocrit ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        55     1.1832                     
 2        49     1.1262  6 0.057072   0.8368
@@ -1960,10 +1960,10 @@ Results are:
 ```
 Single term deletions
 Model:
-hematocrit ~ haemoplasma + bloodparasite + season + sex
+hematocrit ~ hemoplasma + bloodparasite + season + sex
               Df Deviance    AIC scaled dev. Pr(>Chi)   
 <none>             1.1832 384.27                        
-haemoplasma    1   1.1883 382.54      0.2645 0.607020   
+hemoplasma    1   1.1883 382.54      0.2645 0.607020   
 bloodparasite  1   1.2285 384.64      2.3705 0.123646   
 season         1   1.3174 389.30      7.0307 0.008013 **
 sex            1   1.2199 384.19      1.9221 0.165622   
@@ -1980,7 +1980,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        384.27    0.0000
-haemoplasma   382.54   -1.7355
+hemoplasma   382.54   -1.7355
 bloodparasite 384.64    0.3705
 season        389.30    5.0307
 sex           384.19   -0.0779
@@ -1997,7 +1997,7 @@ Results are:
 ```
 Analysis of Deviance Table
 Model 1: hematocrit ~ season
-Model 2: hematocrit ~ haemoplasma * bloodparasite * season * sex
+Model 2: hematocrit ~ hemoplasma * bloodparasite * season * sex
   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 1        58     1.2872                     
 2        49     1.1262  9  0.16103    0.552
@@ -2014,10 +2014,10 @@ qqnorm(res_dev, main = "QQ Plot (Deviance residuals)")
 qqline(res_dev, col = "red")
 ```
 
-Calculation of mean and standard error of `hematocrit` by `haemoplasma` for Cd:
+Calculation of mean and standard error of `hematocrit` by `hemoplasma` for Cd:
 ```
 data_adult_Cd %>%
-  group_by(haemoplasma) %>%
+  group_by(hemoplasma) %>%
   summarise(
     mean_hematocrit = mean(hematocrit, na.rm = TRUE),
     se_hematocrit = sd(hematocrit, na.rm = TRUE) / sqrt(sum(!is.na(hematocrit)))
@@ -2027,7 +2027,7 @@ data_adult_Cd %>%
 Results are:
 ```
 A tibble: 2 × 3
-  haemoplasma mean_hematocrit se_hematocrit
+  hemoplasma mean_hematocrit se_hematocrit
   <fct>                 <dbl>         <dbl>
 1 0                      39.1         1.48 
 2 1                      38.6         0.798
@@ -2056,7 +2056,7 @@ Create violin plots for `hematocrit`
 ```
 label_style <- element_text(size = 28, face = "bold") 
 
-pA <- ggplot(data_adult_Bt, aes(x = factor(haemoplasma, levels = c(0, 1),
+pA <- ggplot(data_adult_Bt, aes(x = factor(hemoplasma, levels = c(0, 1),
                                 labels = c("Uninfected", "Infected")),
                                 y = hematocrit)) +
   geom_violin(fill = "darkolivegreen3", color = "black", alpha = 0.7, trim = FALSE) +
@@ -2098,13 +2098,13 @@ pC <- ggplot(data_adult_Bt, aes(x = factor(sex, levels = c("M", "F"),
   theme_minimal() +
   theme(plot.title = label_style)
 
-pD <- ggplot(data_adult_Cd, aes(x = factor(haemoplasma, levels = c(0, 1),
+pD <- ggplot(data_adult_Cd, aes(x = factor(hemoplasma, levels = c(0, 1),
                                 labels = c("Uninfected", "Infected")),
                                 y = hematocrit)) +
   geom_violin(fill = "goldenrod1", color = "black", alpha = 0.7, trim = FALSE) +
   geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA, color = "black") +
   geom_jitter(width = 0.15, size = 1.5, alpha = 0.5) +
-  labs(x = expression(paste("Haemoplasma", " infection status")),
+  labs(x = expression(paste("Hemoplasma", " infection status")),
        y = "Hematocrit (%)",
        title = "D") +
   scale_y_continuous(limits = c(10, 60)) +
@@ -2140,7 +2140,7 @@ final_plot <- (pA | pB | pC) / (pD | pE | pF)
 print(final_plot)
 ```
 
-## Step 10. Impact of Haemoplasma infections on body temperature (CLRM models 10 and 11)
+## Step 10. Impact of Hemoplasma infections on body temperature (CLRM models 10 and 11)
 Convert `temperature` to numeric, handle left-censored values (<32°C) for analysis in Bt:
 ```
 data_adult_Bt <- data_adult_Bt %>%
@@ -2157,10 +2157,10 @@ temp <- Surv(data_adult_Bt$temperature_numeric,
                   type = "left")
 ```
 
-Fit Gaussian survival regression models to test the effects of `haemoplasma`, `bloodparasite`, `season`, `sex` on `temperature`, with (model_10) and without (model_10b) interactions in Bt:
+Fit Gaussian survival regression models to test the effects of `hemoplasma`, `bloodparasite`, `season`, `sex` on `temperature`, with (model_10) and without (model_10b) interactions in Bt:
 ```
-model_10 <- survreg(temp ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Bt, dist = "gaussian")
-model_10a <- survreg(temp ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Bt, dist = "gaussian")
+model_10 <- survreg(temp ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Bt, dist = "gaussian")
+model_10a <- survreg(temp ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Bt, dist = "gaussian")
 
 ```
 
@@ -2173,8 +2173,8 @@ AIC(model_10a, model_10)
 Results are:
 ```
                                        Terms Resid. Df    -2*LL Test Df  Deviance  Pr(>Chi)
-1 haemoplasma + bloodparasite + season + sex        27 79.74336      NA        NA        NA
-2 haemoplasma * bloodparasite * season * sex        16 79.05558    = 11 0.6877884 0.9999927
+1 hemoplasma + bloodparasite + season + sex        27 79.74336      NA        NA        NA
+2 hemoplasma * bloodparasite * season * sex        16 79.05558    = 11 0.6877884 0.9999927
 ---
           df       AIC
 model_10a  6  91.74336
@@ -2190,10 +2190,10 @@ Results are:
 ```
 Single term deletions
 Model:
-temp ~ haemoplasma + bloodparasite + season + sex
+temp ~ hemoplasma + bloodparasite + season + sex
               Df    AIC    LRT Pr(>Chi)  
 <none>           91.743                  
-haemoplasma    1 91.269 1.5261   0.2167  
+hemoplasma    1 91.269 1.5261   0.2167  
 bloodparasite  1 89.952 0.2084   0.6480  
 season         1 90.275 0.5320   0.4658  
 sex            1 94.666 4.9228   0.0265 *
@@ -2210,7 +2210,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        91.743   0.00000
-haemoplasma   91.269  -0.47387
+hemoplasma   91.269  -0.47387
 bloodparasite 89.952  -1.79159
 season        90.275  -1.46797
 sex           94.666   2.92284
@@ -2219,15 +2219,15 @@ sex           94.666   2.92284
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model10_null <- survreg(temp ~ 1, data = data_adult_Bt, dist = "gaussian")
-model10_haemoplasma <- survreg(temp ~ haemoplasma, data = data_adult_Bt, dist = "gaussian")
+model10_hemoplasma <- survreg(temp ~ hemoplasma, data = data_adult_Bt, dist = "gaussian")
 model10_bloodparasite <- survreg(temp ~ bloodparasite, data = data_adult_Bt, dist = "gaussian")
 model10_season <- survreg(temp ~ season, data = data_adult_Bt, dist = "gaussian")
 model10_sex <- survreg(temp ~ sex, data = data_adult_Bt, dist = "gaussian")
-anova(model10_null, model10_haemoplasma, test="Chisq")
+anova(model10_null, model10_hemoplasma, test="Chisq")
 anova(model10_null, model10_bloodparasite, test="Chisq")
 anova(model10_null, model10_season, test="Chisq")
 anova(model10_null, model10_sex, test="Chisq")
-aics <- AIC(model10_null, model10_haemoplasma, model10_bloodparasite, model10_season, model10_sex)
+aics <- AIC(model10_null, model10_hemoplasma, model10_bloodparasite, model10_season, model10_sex)
 aic_null <- aics["model10_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -2237,7 +2237,7 @@ Results are:
 ```
         Terms Resid. Df    -2*LL Test Df  Deviance  Pr(>Chi)
 1           1        31 85.36015      NA        NA        NA
-2 haemoplasma        30 84.81430    =  1 0.5458493 0.4600186
+2 hemoplasma        30 84.81430    =  1 0.5458493 0.4600186
 ---
           Terms Resid. Df    -2*LL Test Df   Deviance  Pr(>Chi)
 1             1        31 85.36015      NA         NA        NA
@@ -2253,7 +2253,7 @@ Results are:
 ---
                            AIC delta_AIC_vs_null
 model10_null          89.36015          0.000000
-model10_haemoplasma   90.81430          1.454151
+model10_hemoplasma   90.81430          1.454151
 model10_bloodparasite 91.27469          1.914540
 model10_season        91.35333          1.993172
 model10_sex           87.66861         -1.691544
@@ -2282,10 +2282,10 @@ temp <- Surv(data_adult_Cd$temperature_numeric,
                   type = "left")
 ```
 
-Fit Gaussian survival regression models to test the effects of `haemoplasma`, `bloodparasite`, `season`, `sex` on `temperature`, with (model_11) and without (model_11b) interactions in Cd:
+Fit Gaussian survival regression models to test the effects of `hemoplasma`, `bloodparasite`, `season`, `sex` on `temperature`, with (model_11) and without (model_11b) interactions in Cd:
 ```
-model_11 <- survreg(temp ~ haemoplasma * bloodparasite * season * sex, data = data_adult_Cd, dist = "gaussian")
-model_11a <- survreg(temp ~ haemoplasma + bloodparasite + season + sex, data = data_adult_Cd, dist = "gaussian")
+model_11 <- survreg(temp ~ hemoplasma * bloodparasite * season * sex, data = data_adult_Cd, dist = "gaussian")
+model_11a <- survreg(temp ~ hemoplasma + bloodparasite + season + sex, data = data_adult_Cd, dist = "gaussian")
 ```
 
 Compare models using ANOVA and AIC to evaluate the contribution of interaction terms:
@@ -2297,8 +2297,8 @@ AIC(model_11a, model_11)
 Results are:
 ```
                                        Terms Resid. Df    -2*LL Test Df Deviance  Pr(>Chi)
-1 haemoplasma + bloodparasite + season + sex        13 58.22666      NA       NA        NA
-2 haemoplasma * bloodparasite * season * sex         2 54.04089    = 11  4.18577 0.9641642
+1 hemoplasma + bloodparasite + season + sex        13 58.22666      NA       NA        NA
+2 hemoplasma * bloodparasite * season * sex         2 54.04089    = 11  4.18577 0.9641642
 ---
           df      AIC
 model_11a  6 70.22666
@@ -2314,10 +2314,10 @@ Results are:
 ```
 Single term deletions
 Model:
-temp ~ haemoplasma + bloodparasite + season + sex
+temp ~ hemoplasma + bloodparasite + season + sex
               Df    AIC      LRT Pr(>Chi)
 <none>           70.227                  
-haemoplasma    1 68.390 0.163699   0.6858
+hemoplasma    1 68.390 0.163699   0.6858
 bloodparasite  1 68.235 0.008139   0.9281
 season         1 68.269 0.042462   0.8367
 sex            1 68.405 0.178242   0.6729
@@ -2334,7 +2334,7 @@ Results are:
 ```
                  AIC delta_AIC
 <none>        70.227    0.0000
-haemoplasma   68.390   -1.8363
+hemoplasma   68.390   -1.8363
 bloodparasite 68.235   -1.9919
 season        68.269   -1.9575
 sex           68.405   -1.8218
@@ -2343,15 +2343,15 @@ sex           68.405   -1.8218
 Compare the null model (model_null) to univariate models using likelihood ratio tests and AIC:
 ```
 model11_null <- survreg(temp ~ 1, data = data_adult_Cd, dist = "gaussian")
-model11_haemoplasma <- survreg(temp ~ haemoplasma, data = data_adult_Cd, dist = "gaussian")
+model11_hemoplasma <- survreg(temp ~ hemoplasma, data = data_adult_Cd, dist = "gaussian")
 model11_bloodparasite <- survreg(temp ~ bloodparasite, data = data_adult_Cd, dist = "gaussian")
 model11_season <- survreg(temp ~ season, data = data_adult_Cd, dist = "gaussian")
 model11_sex <- survreg(temp ~ sex, data = data_adult_Cd, dist = "gaussian")
-anova(model11_null, model11_haemoplasma, test="Chisq")
+anova(model11_null, model11_hemoplasma, test="Chisq")
 anova(model11_null, model11_bloodparasite, test="Chisq")
 anova(model11_null, model11_season, test="Chisq")
 anova(model11_null, model11_sex, test="Chisq")
-aics <- AIC(model11_null, model11_haemoplasma, model11_bloodparasite, model11_season, model11_sex)
+aics <- AIC(model11_null, model11_hemoplasma, model11_bloodparasite, model11_season, model11_sex)
 aic_null <- aics["model11_null", "AIC"]
 aics$delta_AIC_vs_null <- aics$AIC - aic_null
 print(aics[, c("AIC", "delta_AIC_vs_null")])
@@ -2361,7 +2361,7 @@ Results are:
 ```
         Terms Resid. Df    -2*LL Test Df  Deviance  Pr(>Chi)
 1           1        17 58.73649      NA        NA        NA
-2 haemoplasma        16 58.42303    =  1 0.3134589 0.5755654
+2 hemoplasma        16 58.42303    =  1 0.3134589 0.5755654
 ---
           Terms Resid. Df    -2*LL Test Df   Deviance  Pr(>Chi)
 1             1        17 58.73649      NA         NA        NA
@@ -2377,7 +2377,7 @@ Results are:
 ---
                            AIC delta_AIC_vs_null
 model11_null          62.73649          0.000000
-model11_haemoplasma   64.42303          1.686541
+model11_hemoplasma   64.42303          1.686541
 model11_bloodparasite 64.67821          1.941714
 model11_season        64.64685          1.910358
 model11_sex           64.60173          1.865241
@@ -2390,12 +2390,12 @@ qqnorm(resid_temp)
 qqline(resid_temp, col = "red", lwd = 1)
 ```
 
-## Step 11. Impact of Haemoplasma infections on general health condition 
-Test the association between `haemoplasma` and `health_condition` in Bt:
+## Step 11. Impact of Hemoplasma infections on general health condition 
+Test the association between `hemoplasma` and `health_condition` in Bt:
 ```
-table_health_condition_haemoplasma_Bt <- table(data_Bt$haemoplasma, data_Bt$health_condition)
-table_health_condition_haemoplasma_Bt
-fisher.test(table_health_condition_haemoplasma_Bt)
+table_health_condition_hemoplasma_Bt <- table(data_Bt$hemoplasma, data_Bt$health_condition)
+table_health_condition_hemoplasma_Bt
+fisher.test(table_health_condition_hemoplasma_Bt)
 ```
 
 Results are:
@@ -2405,7 +2405,7 @@ Results are:
   1  0  4
 ---
 Fisher's Exact Test for Count Data
-data:  table_health_condition_haemoplasma_Bt
+data:  table_health_condition_hemoplasma_Bt
 p-value = 1
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -2415,11 +2415,11 @@ odds ratio
        Inf 
 ```
 
-Test the association between `haemoplasma` and `health_condition` in Cd:
+Test the association between `hemoplasma` and `health_condition` in Cd:
 ```
-table_health_condition_haemoplasma_Cd <- table(data_Cd$haemoplasma, data_Cd$health_condition)
-table_health_condition_haemoplasma_Cd
-fisher.test(table_health_condition_haemoplasma_Cd)
+table_health_condition_hemoplasma_Cd <- table(data_Cd$hemoplasma, data_Cd$health_condition)
+table_health_condition_hemoplasma_Cd
+fisher.test(table_health_condition_hemoplasma_Cd)
 ```
 
 Results are:
@@ -2429,7 +2429,7 @@ Results are:
   1  4 64
 ---
 Fisher's Exact Test for Count Data
-data:  table_health_condition_haemoplasma_Cd
+data:  table_health_condition_hemoplasma_Cd
 p-value = 1
 alternative hypothesis: true odds ratio is not equal to 1
 95 percent confidence interval:
@@ -2439,12 +2439,12 @@ odds ratio
   1.140982 
 ```
 
-## Step 12. Impact of Haemoplasma_ infections on female reproductive status 
-Test the association between `haemoplasma` and `female_reproductive_status` in Bt:
+## Step 12. Impact of Hemoplasma_ infections on female reproductive status 
+Test the association between `hemoplasma` and `female_reproductive_status` in Bt:
 ```
-table_haemoplasma_infection_female_Bt <- table(data_Bt$haemoplasma, data_Bt$female_reproductive_status)
-table_haemoplasma_infection_female_Bt
-fisher.test(table_haemoplasma_infection_female_Bt)
+table_hemoplasma_infection_female_Bt <- table(data_Bt$hemoplasma, data_Bt$female_reproductive_status)
+table_hemoplasma_infection_female_Bt
+fisher.test(table_hemoplasma_infection_female_Bt)
 ```
 
 Results are:
@@ -2454,16 +2454,16 @@ Results are:
   1                             0                                 2               0
 ---
 Fisher's Exact Test for Count Data
-data:  table_haemoplasma_infection_female_Bt
+data:  table_hemoplasma_infection_female_Bt
 p-value = 1
 alternative hypothesis: two.sided
 ```
 
-Test the association between `haemoplasma` and `female_reproductive_status` in Cd:
+Test the association between `hemoplasma` and `female_reproductive_status` in Cd:
 ```
-table_haemoplasma_infection_female_Cd <- table(data_Cd$haemoplasma, data_Cd$female_reproductive_status)
-table_haemoplasma_infection_female_Cd
-fisher.test(table_haemoplasma_infection_female_Cd)
+table_hemoplasma_infection_female_Cd <- table(data_Cd$hemoplasma, data_Cd$female_reproductive_status)
+table_hemoplasma_infection_female_Cd
+fisher.test(table_hemoplasma_infection_female_Cd)
 ```
 
 Results are:
@@ -2473,7 +2473,7 @@ Results are:
   1                             5                                32               2
 ---
 Fisher's Exact Test for Count Data
-data:  table_haemoplasma_infection_female_Cd
+data:  table_hemoplasma_infection_female_Cd
 p-value = 0.5051
 alternative hypothesis: two.sided
 ```
