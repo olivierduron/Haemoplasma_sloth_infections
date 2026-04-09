@@ -1,4 +1,4 @@
-# **Haemoplasma epidemiological survey : R command lines and script**
+# **Hemoplasma epidemiological survey : R command lines and script**
 
 EN TRAVAUX - A MODIFIER
 We analyzed data from 175 wild sloths captured between 1994 and 1995 during the flooding of the Petit Saut Dam (5°03′43″ N, 53°03′00″ O) on the Sinnamary River (French Guiana, South America). The clinical data include the following variables for each examined sloth: 
@@ -13,7 +13,7 @@ We analyzed data from 175 wild sloths captured between 1994 and 1995 during the 
 - `temperature` : Body temperature (quantitative variable, in °C)
 - `hematocrit` : Hematocrit level (quantitative variable, in %)
 - `health_condition` : Overall health status (G: Good; D: Deteriorated)
-- `haemoplasma` : Infection status with haemotropic mycoplasmas (0: Uninfected; 1: Infected)
+- `hemoplasma` : Infection status with haemotropic mycoplasmas (0: Uninfected; 1: Infected)
 - `anaplasma` : Infection status with *Anaplasma* (0: Uninfected; 1: Infected)
 - `tick` : Presence of ticks in the fur (0: Absent; 1: Present)
 - `microfilaria` : Infection status with microfilariae (0: Uninfected; 1: Infected)
@@ -40,13 +40,13 @@ Details about all the experimental methods and measures are available in the rel
 
 ## Step 1. Retrieving the data
 
-All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Haemoplasma_sloth_infections/blob/main/data_haemoplasma_sloth.csv)
+All veterinary clinical data for the two sloth species are available here: (https://github.com/olivierduron/Hemoplasma_sloth_infections/blob/main/data_hemoplasma_sloth.csv)
 
-This database will be referred to as `data_haemoplasma` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
+This database will be referred to as `data_hemoplasma` throughout the R command lines and scripts provided below. It corresponds to the dataset provided in Table S1 of the related manuscript.
 
 Load the dataset directly from the GitHub repository to R:
 ```
-data_haemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Haemoplasma_sloth_infections/main/data_haemoplasma_sloth.csv", sep = "\t")
+data_hemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Hemoplasma_sloth_infections/main/data_hemoplasma_sloth.csv", sep = "\t")
 ```
 
 
@@ -54,17 +54,17 @@ data_haemoplasma <- read.csv ("https://raw.githubusercontent.com/olivierduron/Ha
 
 Convert categorical variables into factors:
 ```
-data_haemoplasma$haemoplasma      <- as.factor(data_haemoplasma$haemoplasma)
-data_haemoplasma$anaplasma      <- as.factor(data_haemoplasma$anaplasma)
-data_haemoplasma$species        <- as.factor(data_haemoplasma$species)
-data_haemoplasma$season         <- as.factor(data_haemoplasma$season)
-data_haemoplasma$sex            <- as.factor(data_haemoplasma$sex)
-data_haemoplasma$age            <- as.factor(data_haemoplasma$age)
-data_haemoplasma$tick           <- as.factor(data_haemoplasma$tick)
-data_haemoplasma$microfilaria   <- as.factor(data_haemoplasma$microfilaria)
-data_haemoplasma$trypanosome    <- as.factor(data_haemoplasma$trypanosome)
-data_haemoplasma$babesia        <- as.factor(data_haemoplasma$babesia)
-data_haemoplasma$bloodparasite  <- as.factor(data_haemoplasma$bloodparasite)
+data_hemoplasma$hemoplasma      <- as.factor(data_hemoplasma$hemoplasma)
+data_hemoplasma$anaplasma      <- as.factor(data_hemoplasma$anaplasma)
+data_hemoplasma$species        <- as.factor(data_hemoplasma$species)
+data_hemoplasma$season         <- as.factor(data_hemoplasma$season)
+data_hemoplasma$sex            <- as.factor(data_hemoplasma$sex)
+data_hemoplasma$age            <- as.factor(data_hemoplasma$age)
+data_hemoplasma$tick           <- as.factor(data_hemoplasma$tick)
+data_hemoplasma$microfilaria   <- as.factor(data_hemoplasma$microfilaria)
+data_hemoplasma$trypanosome    <- as.factor(data_hemoplasma$trypanosome)
+data_hemoplasma$babesia        <- as.factor(data_hemoplasma$babesia)
+data_hemoplasma$bloodparasite  <- as.factor(data_hemoplasma$bloodparasite)
 ```
 
 Load libraries for analysis: 
@@ -82,11 +82,11 @@ library(survival)
 library(RColorBrewer)
 ```
 
-## Step 3. Calculate haemoplasma infection prevalence
-Calculate haemoplasma infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
+## Step 3. Calculate hemoplasma infection prevalence
+Calculate hemoplasma infection prevalence and 95% confidence interval for _Bradypus tridactylus_ (Bt) and _Choloepus didactylus_ (Cd):
 
 ```
-prevalence_results <- data_haemoplasma %>% group_by(species) %>% summarise(n = n(), positives = sum(haemoplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
+prevalence_results <- data_hemoplasma %>% group_by(species) %>% summarise(n = n(), positives = sum(hemoplasma == 1), prevalence = positives / n, conf_low = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$lower, conf_high = binom.confint(positives, n, conf.level = 0.95, methods = "exact")$upper)
 print(prevalence_results)
 ```
 
