@@ -57,6 +57,8 @@ Load libraries for analysis:
 ```
 library(dplyr)
 library(ggplot2)
+library(scales)
+library(ggthemes)
 ```
 
 ## Step 3. Hemoplasma prevalence analysis across host species
@@ -206,27 +208,237 @@ Model 2: cbind(n_infected, n - n_infected) ~ n
 
 Create a contingency table
 ```
-
-df_species <- df_species %>%
-  mutate(infected = ifelse(prevalence > 0, 1, 0))
+df_species <- data_hemoplasma_stat %>%
+  group_by(species, order) %>%
+  summarise(
+    n = n(),
+    n_infected = sum(as.numeric(as.character(hemoplasma)) == 1, na.rm = TRUE),
+    prevalence = n_infected / n,
+    infected = ifelse(n_infected > 0, 1, 0),
+    .groups = "drop"
+  )
 df_order <- df_species %>%
   group_by(order) %>%
   summarise(
     infected_species = sum(infected),
-    uninfected_species = n() - sum(infected)
+    uninfected_species = n() - sum(infected),
+    .groups = "drop"
   )
 contingency_table <- df_order %>%
   select(infected_species, uninfected_species) %>%
   as.matrix()
 rownames(contingency_table) <- df_order$order
+contingency_table
+```
 
-
-
-
-# Chi-square test of independence
-chi_test <- chisq.test(contingency_table)
-print(chi_test)
-
-# Fisher's exact test (if expected counts are low)
+Fisher's exact test
+```
 fisher_test <- fisher.test(contingency_table)
 print(fisher_test)
+```
+
+Results are:
+```
+Fisher's Exact Test for Count Data
+data:  contingency_table
+p-value = 0.9999
+alternative hypothesis: two.sided
+```
+
+Create a plot of hemoplasma prevalence by species and mammalian order
+```
+df_species <- data_hemoplasma_stat %>%
+  group_by(species, order) %>%
+  summarise(
+    n = n(),
+    n_infected = sum(as.numeric(as.character(hemoplasma)) == 1, na.rm = TRUE),
+    prevalence = n_infected / n,
+    .groups = "drop"
+  )
+order_colors <- c(
+  "Primates" = "#A6CEE3",
+  "Pilosa" = "#B2DF8A",
+  "Cingulata" = "#FB9A99",
+  "Rodentia" = "#FDBF6F",
+  "Carnivora" = "#CAB2D6",
+  "Didelphimorphia" = "#FFFF99"
+)
+pdf("Hemoplasma_prevalence_by_order.pdf", width = 8, height = 6)
+ggplot(df_species, aes(x = order, y = prevalence)) +
+  geom_jitter(aes(size = n, color = order), width = 0.2, height = 0, alpha = 0.6) +
+  scale_color_manual(values = order_colors) +
+  scale_size_continuous(range = c(2, 12), name = "Sample size") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    x = "Mammalian order",
+    y = "Hemoplasma prevalence",
+    title = "Hemoplasma prevalence by species and mammalian order"
+  ) +
+  theme_minimal(base_size = 16) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16, face = "bold"),
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+dev.off()
+```
+
+## Step 5. Hemoplasma prevalence by species
+
+Prepare species-level data and keep only species with at least 1 infected individual
+```
+df_species <- data_hemoplasma_stat %>%
+  group_by(species) %>%
+  summarise(
+    n = n(),
+    n_infected = sum(as.numeric(as.character(hemoplasma)) == 1, na.rm = TRUE),
+    prevalence = n_infected / n,
+    .groups = "drop"
+  )
+df_infected <- df_species %>%
+  filter(n_infected > 0)
+```
+
+Binomial GLM (for all infected species)
+```
+glm_all <- glm(
+  cbind(n_infected, n - n_infected) ~ species,
+  family = binomial,
+  data = df_infected
+)
+glm_null_all <- glm(
+  cbind(n_infected, n - n_infected) ~ 1,
+  family = binomial,
+  data = df_infected
+)
+anova_all <- anova(glm_null_all, glm_all, test = "Chisq")
+print("=== All infected species ===")
+print(summary(glm_all))
+print(anova_all)
+```
+```
+Results are:
+```
+Call:
+glm(formula = cbind(n_infected, n - n_infected) ~ species, family = binomial, 
+    data = df_infected)
+Coefficients:
+                                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                        2.3026     0.7416   3.105  0.00190 ** 
+speciesBradypus_tridactylus       -5.5607     0.8998  -6.180 6.41e-10 ***
+speciesCholoepus_didactylus       -0.9163     0.7870  -1.164  0.24434    
+speciesCoendou_sp                 -2.9957     1.4318  -2.092  0.03641 *  
+speciesDasypus_novemcinctus       -2.9957     0.9220  -3.249  0.00116 ** 
+speciesDidelphis_marsupialis      -2.5788     0.7937  -3.249  0.00116 ** 
+speciesGalictis_vittata           -1.2040     1.3723  -0.877  0.38032    
+speciesHolochilus_sciureus        -3.6889     1.3416  -2.750  0.00597 ** 
+speciesLontra_longicaudis         21.2635 79462.0195   0.000  0.99979    
+speciesMarmosa_lepida             21.2635 79461.9966   0.000  0.99979    
+speciesMarmosa_murina             -4.4998     1.0515  -4.280 1.87e-05 ***
+speciesNectomys_rattus            -2.3026     1.2450  -1.849  0.06439 .  
+speciesOecomys_auyantepui         -5.0106     1.2715  -3.941 8.12e-05 ***
+speciesOligoryzomys_fulvescens    -4.0943     1.3102  -3.125  0.00178 ** 
+speciesPhilander_opossum          -2.7081     0.8708  -3.110  0.00187 ** 
+speciesPotos_flavus               -2.3026     1.5969  -1.442  0.14932    
+speciesProechimys_cuvieri         -5.1358     1.2684  -4.049 5.14e-05 ***
+speciesProechimys_guyannensis     -5.2470     1.2660  -4.145 3.40e-05 ***
+speciesRattus_rattus              -5.1930     1.2671  -4.098 4.16e-05 ***
+speciesSaguinus_midas             24.1352 52162.4892   0.000  0.99963    
+
+(Dispersion parameter for binomial family taken to be 1)
+    Null deviance: 3.0552e+02  on 19  degrees of freedom
+Residual deviance: 5.0351e-10  on  0  degrees of freedom
+AIC: 81.765
+Number of Fisher Scoring iterations: 22
+
+Analysis of Deviance Table
+Model 1: cbind(n_infected, n - n_infected) ~ 1
+Model 2: cbind(n_infected, n - n_infected) ~ species
+  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+1        19     305.52                          
+2         0       0.00 19   305.52 < 2.2e-16 ***
+```
+
+Binomial GLM (for infected species with n >= 5)
+```
+df_infected_f <- df_infected %>% filter(n >= 5)
+glm_filtered <- glm(
+  cbind(n_infected, n - n_infected) ~ species,
+  family = binomial,
+  data = df_infected_f
+)
+glm_null_filtered <- glm(
+  cbind(n_infected, n - n_infected) ~ 1,
+  family = binomial,
+  data = df_infected_f
+)
+anova_filtered <- anova(glm_null_filtered, glm_filtered, test = "Chisq")
+print("=== Species with n >= 5 ===")
+print(summary(glm_filtered))
+print(anova_filtered)
+```
+Results are:
+```
+Call: glm(formula = cbind(n_infected, n - n_infected) ~ species, family = binomial, 
+    data = df_infected_f)
+Coefficients:
+                                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                        2.3026     0.7416   3.105  0.00190 ** 
+speciesBradypus_tridactylus       -5.5607     0.8998  -6.180 6.41e-10 ***
+speciesCholoepus_didactylus       -0.9163     0.7870  -1.164  0.24434    
+speciesDasypus_novemcinctus       -2.9957     0.9220  -3.249  0.00116 ** 
+speciesDidelphis_marsupialis      -2.5788     0.7937  -3.249  0.00116 ** 
+speciesHolochilus_sciureus        -3.6889     1.3416  -2.750  0.00597 ** 
+speciesMarmosa_murina             -4.4998     1.0515  -4.280 1.87e-05 ***
+speciesOecomys_auyantepui         -5.0106     1.2715  -3.941 8.12e-05 ***
+speciesOligoryzomys_fulvescens    -4.0943     1.3102  -3.125  0.00178 ** 
+speciesPhilander_opossum          -2.7081     0.8708  -3.110  0.00187 ** 
+speciesProechimys_cuvieri         -5.1358     1.2684  -4.049 5.14e-05 ***
+speciesProechimys_guyannensis     -5.2470     1.2660  -4.145 3.40e-05 ***
+speciesRattus_rattus              -5.1930     1.2671  -4.098 4.16e-05 ***
+speciesSaguinus_midas             24.1352 52162.4892   0.000  0.99963    
+
+(Dispersion parameter for binomial family taken to be 1)
+    Null deviance: 2.9957e+02  on 13  degrees of freedom
+Residual deviance: 2.7045e-10  on  0  degrees of freedom
+AIC: 63.069
+Number of Fisher Scoring iterations: 22
+
+Analysis of Deviance Table
+Model 1: cbind(n_infected, n - n_infected) ~ 1
+Model 2: cbind(n_infected, n - n_infected) ~ species
+  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+1        13     299.57                          
+2         0       0.00 13   299.57 < 2.2e-16 ***
+```
+
+Scatter plot for infected species
+```
+plot_file <- "hemoplasma_prevalence_species.pdf"
+pdf(plot_file, width = 8, height = 5)  # PDF output
+ggplot(df_infected, aes(x = species, y = prevalence, size = n)) +
+  geom_point(alpha = 0.5, color = "#69b3a2") +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "Species",
+    y = "Hemoplasma prevalence",
+    size = "Sample size"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1, size = 10),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  ) +
+  scale_size_continuous(range = c(2, 8))
+dev.off()
+cat("PDF saved to:", plot_file, "\n")
+```
+
+
+
+
