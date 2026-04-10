@@ -518,6 +518,90 @@ orderRodent -0.853  0.500  0.706  0.617  0.619
 ```
 
 
+FIGURE TRAITS
+```
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 
+# =========================
+# 1. AGGREGATION PAR ESPECE
+# =========================
+df_species <- data_hemoplasma_stat %>%
+  group_by(species, body_size, vertical_stratum, locomotion,
+           activity, diet, sociality) %>%
+  summarise(
+    n = n(),
+    n_infected = sum(hemoplasma == 1, na.rm = TRUE),
+    prevalence = n_infected / n,
+    .groups = "drop"
+  )
 
+# =========================
+# 2. FORMAT LONG
+# =========================
+df_long <- df_species %>%
+  pivot_longer(
+    cols = c(body_size, vertical_stratum, locomotion,
+             activity, diet, sociality),
+    names_to = "trait",
+    values_to = "category"
+  )
+
+df_long$trait <- factor(df_long$trait,
+                        levels = c("body_size",
+                                   "vertical_stratum",
+                                   "locomotion",
+                                   "activity",
+                                   "diet",
+                                   "sociality"))
+
+# =========================
+# 3. COULEURS PAR TRAIT (SEULEMENT 6)
+# =========================
+trait_colors <- c(
+  body_size = "#A6CEE3",
+  vertical_stratum = "#B2DF8A",
+  locomotion = "#FDBF6F",
+  activity = "#CAB2D6",
+  diet = "#FFFF99",
+  sociality = "#FB9A99"
+)
+
+# =========================
+# 4. PLOT
+# =========================
+p <- ggplot(df_long, aes(x = category, y = prevalence)) +
+  
+  geom_point(aes(size = n, fill = trait),
+             shape = 21, color = "black", alpha = 0.85) +
+  
+  scale_fill_manual(values = trait_colors) +
+  
+  scale_size(range = c(2, 8)) +
+  
+  facet_wrap(~ trait, scales = "free_x", ncol = 3) +
+  
+  theme_classic(base_size = 14) +
+  
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
+  
+  labs(
+    x = NULL,
+    y = "Hemoplasma prevalence (per species)"
+  )
+
+p
+ggsave(
+  filename = "hemoplasma_traits_prevalence.pdf",
+  plot = p,
+  width = 12,
+  height = 7
+)
+```
 
