@@ -84,11 +84,14 @@ species_summary <- data_hemoplasma_stat %>%
   group_by(species) %>%
   summarise(
     n_sampled = n(),
-    n_positive = sum(as.numeric(as.character(hemoplasma)), na.rm = TRUE),
-    prevalence = n_positive / n_sampled
+    n_positive = sum(as.numeric(as.character(hemoplasma)), na.rm = TRUE)
   ) %>%
-  ungroup()
-head(species_summary)
+  ungroup() %>%
+  mutate(
+    n_negative = n_sampled - n_positive,
+    hemoplasma_response = cbind(n_positive, n_negative),
+    prevalence = n_positive / n_sampled
+  )
 
 p <- ggplot(species_summary, aes(x = n_sampled, y = prevalence)) +
   geom_point(size = 3, alpha = 0.7) +
@@ -102,28 +105,30 @@ p <- ggplot(species_summary, aes(x = n_sampled, y = prevalence)) +
     y = "Hemoplasma prevalence",
     title = "Effect of sampling effort on hemoplasma detection"
   )
+
 print(p)
 ggsave(
-  filename = "sampling_effort_hemoplasma.pdf",
+  filename = "hemoplasma_sampling_effect.pdf",
   plot = p,
   width = 7,
   height = 5,
   units = "in"
-  )
+)
 ```
 
 Binomial GLM (model #1) : 
 ```
 model_n <- glm(
-  cbind(n_positive, n_sampled - n_positive) ~ n_sampled,
+  hemoplasma_response ~ n_sampled,
   family = binomial,
   data = species_summary
 )
 model_null <- glm(
-  cbind(n_positive, n_sampled - n_positive) ~ 1,
+  hemoplasma_response ~ 1,
   family = binomial,
   data = species_summary
 )
+
 anova(model_null, model_n, test = "Chisq")
 AIC(model_null, model_n)
 ```
