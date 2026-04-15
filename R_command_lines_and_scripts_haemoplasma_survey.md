@@ -116,7 +116,7 @@ ggsave(
 )
 ```
 
-Spearman correlation test
+Spearman correlation test :
 ```
 cor.test(
   species_summary$n_sampled,
