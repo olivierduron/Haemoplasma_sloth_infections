@@ -726,8 +726,128 @@ Results are:
 2  Solitary 0.2522081 0.2257055 Inf 0.03129654 0.7788041 25.22081 3.129654 77.88041
 ```
 
+Create a plot of hemoplasma prevalence by species ecological traits :
+```
+df_species <- data_hemoplasma_stat %>%
+  group_by(species, vertical_stratum, activity, diet, sociality) %>%
+  summarise(
+    n = n(),
+    n_infected = sum(hemoplasma == 1, na.rm = TRUE),
+    prevalence = n_infected / n,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    prevalence = ifelse(is.nan(prevalence), 0, prevalence)
+  )
 
+fix_emm <- function(df, var){
 
+  df <- as.data.frame(df)
+
+  df[[var]] <- as.character(df[[var]])
+
+  df$prob  <- as.numeric(df$prob)
+  df$lower <- as.numeric(df$asymp.LCL)
+  df$upper <- as.numeric(df$asymp.UCL)
+
+  df
+}
+
+prob_stratum  <- fix_emm(prob_stratum, "vertical_stratum")
+prob_activity  <- fix_emm(prob_activity, "activity")
+prob_diet      <- fix_emm(prob_diet, "diet")
+prob_social    <- fix_emm(prob_social, "sociality")
+
+make_panel <- function(df, pred, var, palette, title){
+
+  df[[var]] <- factor(df[[var]])
+  pred[[var]] <- factor(pred[[var]])
+
+  ggplot() +
+
+    # species points
+    geom_jitter(
+      data = df,
+      aes(x = .data[[var]], y = prevalence,
+          color = .data[[var]], size = n),
+      width = 0.20,
+      alpha = 0.65,
+      na.rm = TRUE
+    ) +
+
+    # LOWER CI
+    geom_segment(
+      data = pred,
+      aes(
+        x = as.numeric(.data[[var]]) - 0.15,
+        xend = as.numeric(.data[[var]]) + 0.15,
+        y = lower,
+        yend = lower,
+        color = .data[[var]]
+      ),
+      linewidth = 0.9,
+      na.rm = TRUE
+    ) +
+
+    # MEAN
+    geom_segment(
+      data = pred,
+      aes(
+        x = as.numeric(.data[[var]]) - 0.15,
+        xend = as.numeric(.data[[var]]) + 0.15,
+        y = prob,
+        yend = prob,
+        color = .data[[var]]
+      ),
+      linewidth = 1.3,
+      na.rm = TRUE
+    ) +
+
+    # UPPER CI
+    geom_segment(
+      data = pred,
+      aes(
+        x = as.numeric(.data[[var]]) - 0.15,
+        xend = as.numeric(.data[[var]]) + 0.15,
+        y = upper,
+        yend = upper,
+        color = .data[[var]]
+      ),
+      linewidth = 0.9,
+      na.rm = TRUE
+    ) +
+
+    scale_color_manual(values = palette, drop = FALSE) +
+    scale_size_continuous(range = c(2, 9), name = "Sample size") +
+
+    scale_y_continuous(
+      labels = percent_format(accuracy = 1)
+    ) +
+
+    labs(
+      x = NULL,
+      y = "Hemoplasma prevalence",
+      title = title
+    ) +
+
+    theme_classic(base_size = 13) +
+    theme(
+      legend.position = "none",
+      axis.text.x = element_text(angle = 35, hjust = 1),
+      plot.title = element_text(face = "bold", hjust = 0.5)
+    )
+}
+pA <- make_panel(df_species, prob_stratum, "vertical_stratum", stratum_colors, "A")
+pB <- make_panel(df_species, prob_activity, "activity", activity_colors, "B")
+pC <- make_panel(df_species, prob_diet, "diet", diet_colors, "C")
+pD <- make_panel(df_species, prob_social, "sociality", social_colors, "D")
+figure1 <- (pA | pB) / (pC | pD)
+figure1
+pdf(file = file.path(getwd(), "Figure1_Hemoplasma.pdf"),
+    width = 12, height = 9, useDingbats = FALSE)
+print(figure1)
+dev.off()
+```
 
 yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
