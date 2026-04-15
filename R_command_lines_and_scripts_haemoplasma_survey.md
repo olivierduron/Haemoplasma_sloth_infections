@@ -73,6 +73,7 @@ library(lme4)
 library(car)
 library(emmeans)
 library(brms)
+library(patchwork)
 ```
 
 ## Step 3. Test whether hemoplasma detection depends on species sampling effort
