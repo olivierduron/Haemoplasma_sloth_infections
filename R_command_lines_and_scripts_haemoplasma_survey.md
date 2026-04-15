@@ -135,7 +135,7 @@ sample estimates:
 0.312126 
 ```
 
-## Step 4. Test infection distribution across mammalian orders
+## Step 4. Test infection distribution across mammalian orders (+ test sampling bias effect; GLMM with species random effect : model #1) : 
 
 Create and visualize contingency tables per species and order : 
 ```
@@ -229,49 +229,145 @@ Primates                       2                  3
 Rodentia                       8                 11
 ```
 
-Host order effects on hemoplasma infection prevalence (GLMM with species random effect; model #2) : 
+Create sampling effort variable :
 ```
-mod_glmm <- glmer(
-  hemoplasma ~ order + (1 | species),
-  data = data_hemoplasma_stat,
+data_hemoplasma_stat <- data_hemoplasma_stat %>%
+  group_by(species) %>%
+  mutate(
+    n_sampled = n(),
+    log_n = log(n_sampled)
+  ) %>%
+  ungroup()
+```
+
+Models : 
+```
+# Null model (species random effect only)
+mod_null <- glmer(
+  hemoplasma ~ 1 + (1 | species),
   family = binomial,
-  control = glmerControl(optimizer = "bobyqa"))
-mod_glmm
-drop1(mod_glmm, test = "Chisq")
+  data = data_hemoplasma_stat
+)
+
+# Order only model
+mod_order_only <- glmer(
+  hemoplasma ~ order + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e5))
+)
+
+# Full model (order + sampling effort)
+mod_full <- glmer(
+  hemoplasma ~ order + log_n + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e5))
+)
+
+summary(mod_full)
+```
+
+Results are : 
+```
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: hemoplasma ~ order + log_n + (1 | species)
+   Data: data_hemoplasma_stat
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    414.8     450.1    -199.4     398.8       606 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0444 -0.2310 -0.1769  0.1224  4.7470 
+
+Random effects:
+ Groups  Name        Variance Std.Dev.
+ species (Intercept) 3.347    1.829   
+Number of obs: 614, groups:  species, 44
+
+Fixed effects:
+                     Estimate Std. Error z value Pr(>|z|)   
+(Intercept)           -1.3932     1.1807  -1.180  0.23800   
+orderCingulata        -1.8148     2.0681  -0.878  0.38021   
+orderDidelphimorphia  -2.5358     1.5494  -1.637  0.10170   
+orderPilosa           -2.9356     2.0342  -1.443  0.14899   
+orderPrimates          1.0400     1.7047   0.610  0.54182   
+orderRodentia         -3.8349     1.4124  -2.715  0.00662 **
+log_n                  0.6804     0.3915   1.738  0.08225 . 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) ordrCn ordrDd ordrPl ordrPr ordrRd
+orderCinglt -0.419                                   
+ordrDdlphmr -0.527  0.501                            
+orderPilosa -0.316  0.445  0.651                     
+orderPrimts -0.515  0.431  0.598  0.526              
+orderRodent -0.599  0.534  0.751  0.676  0.640       
+log_n       -0.333 -0.249 -0.434 -0.587 -0.277 -0.409
+```
+
+Single-term deletion (drop1 analysis) :
+```
+mod_step1 <- drop1(mod_full, test = "Chisq")
+mod_step1
+Single term deletions
+```
+
+Results are : 
+```
+Model:
+hemoplasma ~ order + log_n + (1 | species)
+       npar    AIC     LRT Pr(Chi)  
+<none>      414.76                  
+order     5 416.94 12.1855 0.03233 *
+log_n     1 416.19  3.4387 0.06369 .
+```
+
+Likelihood Ratio Tests (LRT) : 
+```
+anova(mod_null, mod_order_only, mod_full, test = "Chisq")
+```
+
+Results are:
+```
+Data: data_hemoplasma_stat
+Models:
+mod_null: hemoplasma ~ 1 + (1 | species)
+mod_order_only: hemoplasma ~ order + (1 | species)
+mod_full: hemoplasma ~ order + log_n + (1 | species)
+               npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)  
+mod_null          2 416.38 425.22 -206.19    412.38                        
+mod_order_only    7 416.19 447.13 -201.10    402.19 10.1867  5    0.07011 .
+mod_full          8 414.76 450.11 -199.38    398.76  3.4387  1    0.06369 .
+```
+
+AIC model comparison :
+```
+model_set <- list(
+  null = mod_null,
+  order = mod_order_only,
+  full = mod_full
+)
 AIC_table <- data.frame(
-model = c("full (order + species)", "null (species only)"),
-AIC = c(AIC(mod_glmm), AIC(mod_null))
+  model = names(model_set),
+  AIC = sapply(model_set, AIC)
 )
 AIC_table$delta_AIC <- AIC_table$AIC - min(AIC_table$AIC)
 AIC_table
 ```
 
-Results are: 
+Results are:
 ```
-Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
- Family: binomial  ( logit )
-Formula: hemoplasma ~ order + (1 | species)
-   Data: data_hemoplasma_stat
-      AIC       BIC    logLik -2*log(L)  df.resid 
- 416.1937  447.1337 -201.0969  402.1937       607 
-Random effects:
- Groups  Name        Std.Dev.
- species (Intercept) 1.906   
-Number of obs: 614, groups:  species, 44
-Fixed Effects:
-         (Intercept)        orderCingulata  orderDidelphimorphia           orderPilosa         orderPrimates         orderRodentia  
-              -0.748                -1.034                -1.449                -1.094                 1.732                -2.950  
+      model      AIC delta_AIC
+null   null 416.3804  1.625414
+order order 416.1937  1.438718
+full   full 414.7550  0.000000
+```
 
-Single term deletions
-Model:
-hemoplasma ~ order + (1 | species)
-       npar    AIC    LRT Pr(Chi)  
-<none>      416.19                 
-order     5 416.38 10.187 0.07011 .
-
-                   model      AIC delta_AIC
-1 full (order + species) 416.1937 0.0000000
-2    null (species only) 416.3804 0.1866964
 ```
 
 Tukey-adjusted post-hoc comparisons of estimated marginal means :
