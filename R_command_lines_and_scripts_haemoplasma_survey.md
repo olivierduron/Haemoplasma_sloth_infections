@@ -116,35 +116,24 @@ ggsave(
 )
 ```
 
-Binomial GLM (model #1) : 
+Spearman correlation test
 ```
-model_n <- glm(
-  hemoplasma_response ~ n_sampled,
-  family = binomial,
-  data = species_summary
+cor.test(
+  species_summary$n_sampled,
+  species_summary$prevalence,
+  method = "spearman"
 )
-model_null <- glm(
-  hemoplasma_response ~ 1,
-  family = binomial,
-  data = species_summary
-)
-
-anova(model_null, model_n, test = "Chisq")
-AIC(model_null, model_n)
 ```
 
 Results are : 
 ```
-Analysis of Deviance Table
-Model 1: cbind(n_positive, n_sampled - n_positive) ~ 1
-Model 2: cbind(n_positive, n_sampled - n_positive) ~ n_sampled
-  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
-1        43     442.01                          
-2        42     428.11  1   13.903 0.0001925 ***
-
-AIC         df      AIC
-model_null  1 485.7779
-model_n     2 473.8746
+Spearman's rank correlation rho
+data:  species_summary$n_sampled and species_summary$prevalence
+S = 9760.9, p-value = 0.03915
+alternative hypothesis: true rho is not equal to 0
+sample estimates:
+     rho 
+0.312126 
 ```
 
 ## Step 4. Test infection distribution across mammalian orders
