@@ -236,7 +236,7 @@ data_hemoplasma_stat <- data_hemoplasma_stat %>%
 
 Full GLMM: 
 ```
-mod_full <- glmer(
+mod1_full <- glmer(
   hemoplasma ~ order + log_n + (1 | species),
   family = binomial,
   data = data_hemoplasma_stat,
@@ -247,48 +247,50 @@ mod_full <- glmer(
 
 Model selection (LRT) :
 ```
-mod_no_order <- update(mod_full, . ~ . - order)
-mod_no_logn  <- update(mod_full, . ~ . - log_n)
-anova(mod_full, mod_no_order, test = "Chisq")
-anova(mod_full, mod_no_logn, test = "Chisq")
+mod1_no_order <- update(mod1_full, . ~ . - order)
+mod1_no_logn  <- update(mod1_full, . ~ . - log_n)
+anova(mod1_full, mod1_no_order, test = "Chisq")
+anova(mod1_full, mod1_no_logn, test = "Chisq")
 ```
 
 Results are: 
 ```
-> anova(mod_full, mod_no_order, test = "Chisq")
+> anova(mo1d_full, mod1_no_order, test = "Chisq")
 Data: data_hemoplasma_stat
 Models:
-mod_no_order: hemoplasma ~ log_n + (1 | species)
-mod_full: hemoplasma ~ order + log_n + (1 | species)
+mod1_no_order: hemoplasma ~ log_n + (1 | species)
+mod1_full: hemoplasma ~ order + log_n + (1 | species)
              npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
-mod_no_order    3 416.94 430.20 -205.47    410.94                       
-mod_full        8 414.76 450.11 -199.38    398.76 12.185  5    0.03233 *
-> anova(mod_full, mod_no_logn, test = "Chisq")
+mod1_no_order    3 416.94 430.20 -205.47    410.94                       
+mod1_full        8 414.76 450.11 -199.38    398.76 12.185  5    0.03233 *
+> anova(mod1_full, mod1_no_logn, test = "Chisq")
 Data: data_hemoplasma_stat
 Models:
-mod_no_logn: hemoplasma ~ order + (1 | species)
-mod_full: hemoplasma ~ order + log_n + (1 | species)
+mod1_no_logn: hemoplasma ~ order + (1 | species)
+mod1_full: hemoplasma ~ order + log_n + (1 | species)
             npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
-mod_no_logn    7 416.19 447.13 -201.10    402.19                       
-mod_full       8 414.76 450.11 -199.38    398.76 3.4387  1    0.06369 .
+mod1_no_logn    7 416.19 447.13 -201.10    402.19                       
+mod1_full       8 414.76 450.11 -199.38    398.76 3.4387  1    0.06369 .
 ```
 
 AIC comparison : 
 ```
-AIC(mod_full, mod_no_order, mod_no_logn)
+AIC_table <- AIC(mod1_full, mod1_no_order, mod1_no_logn)
+AIC_table$delta_AIC <- AIC_table$AIC - min(AIC_table$AIC)
+AIC_table
 ```
 
 Results are :
 ```
              df      AIC
-mod_full      8 414.7550
-mod_no_order  3 416.9406
-mod_no_logn   7 416.1937
+mod1_full      8 414.7550
+mod1_no_order  3 416.9406
+mod1_no_logn   7 416.1937
 ```
 
 Summarize full model :
 ```
-summary(mod_full)
+summary(mo1d_full)
 ```
 
 Results are :
@@ -335,15 +337,15 @@ log_n       -0.333 -0.249 -0.434 -0.587 -0.277 -0.409
 
 Predicted infection probabilities with confidence interval per order :
 ```
-emm_prob <- emmeans(mod_full, ~ order, type = "response")
-prob_df <- as.data.frame(emm_prob)
-prob_df <- prob_df %>%
+emm1_prob <- emmeans(mod1_full, ~ order, type = "response")
+prob1_df <- as.data.frame(emm1_prob)
+prob1_df <- prob_df %>%
   mutate(
     percent = prob * 100,
     lower_percent = asymp.LCL * 100,
     upper_percent = asymp.UCL * 100
   )
-emm_prob
+emm1_prob
 ```
 
 Results are :
@@ -359,7 +361,7 @@ Results are :
 
 Tukey-adjusted post-hoc comparisons of estimated marginal means :
 ```
-pairs(emm_prob, adjust = "tukey")
+pairs(emm1_prob, adjust = "tukey")
 ```
 
 Results are :
@@ -510,42 +512,78 @@ data_inf <- data_inf %>%
 
 GLMM full model :
 ```
-mod_sex_inf <- glmer(
+mod2_sex_inf <- glmer(
   hemoplasma ~ sex + log_n + (1 | species),
   family = binomial,
   data = data_inf,
   control = glmerControl(optimizer = "bobyqa",
                          optCtrl = list(maxfun = 1e5))
 )
-summary(mod_sex_inf)
+summary(mod2_sex_inf)
 ```
 
-XXX : 
+Model selection (LRT) :
 ```
-# ----------------------------
-# 4. Test effet sexe (LRT correct)
-# ----------------------------
-mod_no_sex_inf <- update(mod_sex_inf, . ~ . - sex)
+mod2_no_sex <- update(mod2_sex_inf, . ~ . - sex)
+mod_no_logn  <- update(mod2_sex_inf, . ~ . - log_n)
+anova(mod2_sex_inf, mod2_no_sex, test = "Chisq")
+anova(mod2_sex_inf, mod_no_logn, test = "Chisq")
+```
 
-anova(mod_sex_inf, mod_no_sex_inf, test = "Chisq")
+Results are :
+```
+> anova(mod2_sex_inf, mod2_no_sex, test = "Chisq")
+Data: data_inf
+Models:
+mod2_no_sex: hemoplasma ~ log_n + (1 | species)
+mod2_sex_inf: hemoplasma ~ sex + log_n + (1 | species)
+             npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
+mod2_no_sex     3 288.29 299.78 -141.14    282.29                       
+mod2_sex_inf    4 287.49 302.82 -139.75    279.49 2.7952  1    0.09455 .
+> anova(mod2_sex_inf, mod_no_logn, test = "Chisq")
+Data: data_inf
+Models:
+mod_no_logn: hemoplasma ~ sex + (1 | species)
+mod2_sex_inf: hemoplasma ~ sex + log_n + (1 | species)
+             npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod_no_logn     3 285.49 296.99 -139.75    279.49                     
+mod2_sex_inf    4 287.49 302.82 -139.75    279.49 0.0018  1     0.9658
+```
 
-# ----------------------------
-# 5. Probabilités interprétables (emmeans)
-# ----------------------------
+AIC comparison :
+```
+AIC_table <- AIC(mod2_sex_inf, mod2_no_sex, mod_no_logn)
+AIC_table$delta_AIC <- AIC_table$AIC - min(AIC_table$AIC)
+AIC_table
+```
+
+Results are :
+```
+             df      AIC delta_AIC
+mod2_sex_inf  4 287.4924  1.998161
+mod2_no_sex   3 288.2876  2.793350
+mod_no_logn   3 285.4942  0.000000
+```
+
+SIMPLIFICATION A FAIRE!
+
+Estimated marginal means (emmeans): 
+```
 emm_sex_inf <- emmeans(mod_sex_inf, ~ sex, type = "response")
-
 prob_sex_df <- as.data.frame(emm_sex_inf)
-
 print(prob_sex_df)
 ```
 
+Results are : 
+```
+xxxxxx
+```
 
 
 
 
 
-
-## Step 5. Test infection prevalence variation across species ecological traits (GLMM with species random effect : model #2) : 
+## Step 6. Test infection prevalence variation across species ecological traits (GLMM with species random effect : model #3) : 
 
 Prepare data (sampling effort) :
 ```
