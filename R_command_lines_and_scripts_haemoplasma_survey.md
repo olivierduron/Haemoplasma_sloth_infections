@@ -177,16 +177,15 @@ sample estimates:
 
 ## Step 4. Test infection prevalence variation across mammalian orders (+ test sampling bias effect; GLMM with species random effect : model #1) : 
 
-Create and visualize contingency tables per species and order : 
+Create and visualize contingency tables order : 
 ```
 df_species <- data_hemoplasma_stat %>%
   group_by(species) %>%
   summarise(
     n = n(),                             
-    n_infected = sum(hemoplasma == 1, na.rm = TRUE),  # infected individuals
+    n_infected = sum(hemoplasma == 1, na.rm = TRUE), 
     prevalence = n_infected / n  
   )
-print(df_species, n = Inf)
 df_species <- data_hemoplasma_stat %>%
   group_by(species, order) %>%
   summarise(
@@ -212,54 +211,6 @@ contingency_table
 
 Synthesis tables are :
 ```
-# A tibble: 44 × 4
-   species                       n n_infected prevalence
-   <fct>                     <int>      <int>      <dbl>
- 1 Alouatta_macconnelli         22         20     0.909 
- 2 Bradypus_tridactylus        108          4     0.0370
- 3 Cabassous_unicinctus          2          0     0     
- 4 Caluromys_philander           5          0     0     
- 5 Cebus_apella                  1          0     0     
- 6 Choloepus_didactylus         90         72     0.8   
- 7 Coendou_melanurus             1          0     0     
- 8 Coendou_sp                    3          1     0.333 
- 9 Cyclopes_didactylus           1          0     0     
-10 Dasypus_novemcinctus         15          5     0.333 
-11 Didelphis_marsupialis        51         22     0.431 
-12 Eira_barbara                  4          0     0     
-13 Felis_wiedii                  1          0     0     
-14 Galictis_vittata              4          3     0.75  
-15 Holochilus_sciureus           5          1     0.2   
-16 Hydrochoerus_hydrochaeris     2          0     0     
-17 Hylaeamys_megacephalus       15          0     0     
-18 Hylaeamys_yunganus           10          0     0     
-19 Lontra_longicaudis            1          1     1     
-20 Makalata_didelphoides         8          0     0     
-21 Marmosa_lepida                1          1     1     
-22 Marmosa_murina               20          2     0.1   
-23 Marmosops_parvidens           5          0     0     
-24 Mesomys_hispidus             13          0     0     
-25 Metachirus_nudicaudatus       5          0     0     
-26 Micoureus_demerarae          16          0     0     
-27 Mus_musculus                 34          0     0     
-28 Neacomys_dubosti              1          0     0     
-29 Neacomys_paracou              8          0     0     
-30 Nectomys_rattus               4          2     0.5   
-31 Oecomys_auyantepui           16          1     0.0625
-32 Oecomys_bicolor              16          0     0     
-33 Oligoryzomys_fulvescens       7          1     0.143 
-34 Philander_opossum            20          8     0.4   
-35 Pithecia_pithecia             1          0     0     
-36 Potos_flavus                  2          1     0.5   
-37 Proechimys_cuvieri           18          1     0.0556
-38 Proechimys_guyannensis       20          1     0.05  
-39 Puma_yagouaroundi             5          0     0     
-40 Rattus_rattus                19          1     0.0526
-41 Saguinus_midas               41         41     1     
-42 Saimiri_sciureus              1          0     0     
-43 Sciurus_aestuans              1          0     0     
-44 Tamandua_tetradactyla         3          0     0     
-
 Order                infected_species uninfected_species
 Carnivora                      3                  3
 Cingulata                      1                  1
@@ -297,6 +248,14 @@ mod_order_only <- glmer(
   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e5))
 )
 
+# Sampling effort only model
+mod_log_n_only <- glmer(
+  hemoplasma ~ log_n + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e5))
+)
+
 # Full model (order + sampling effort)
 mod_full <- glmer(
   hemoplasma ~ order + log_n + (1 | species),
@@ -304,7 +263,6 @@ mod_full <- glmer(
   data = data_hemoplasma_stat,
   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e5))
 )
-
 summary(mod_full)
 ```
 
@@ -354,7 +312,6 @@ Single-term deletion (drop1 analysis) :
 ```
 mod_step1 <- drop1(mod_full, test = "Chisq")
 mod_step1
-Single term deletions
 ```
 
 Results are : 
@@ -369,7 +326,7 @@ log_n     1 416.19  3.4387 0.06369 .
 
 Likelihood Ratio Tests (LRT) : 
 ```
-anova(mod_null, mod_order_only, mod_full, test = "Chisq")
+anova(mod_null, mod_order_only, mod_log_n_only,mod_full, test = "Chisq")
 ```
 
 Results are:
@@ -390,6 +347,7 @@ AIC model comparison :
 model_set <- list(
   null = mod_null,
   order = mod_order_only,
+  log_n = mod_log_n_only,
   full = mod_full
 )
 AIC_table <- data.frame(
