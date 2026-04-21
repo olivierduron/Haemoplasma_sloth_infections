@@ -102,7 +102,7 @@ species_summary <- data_hemoplasma_stat %>%
 species_summary
 ```
 
-Results are: 
+Results : 
 ```
 # A tibble: 44 × 8
    species                 n_sampled n_positive n_negative prevalence ci_low ci_high
@@ -157,7 +157,7 @@ cor.test(
 )
 ```
 
-Results are : 
+Results : 
 ```
 Spearman's rank correlation rho
 data:  species_summary$n_sampled and species_summary$prevalence
@@ -168,7 +168,7 @@ sample estimates:
 0.312126 
 ```
 
-Interpretation :
+### Interpretation
 Hemoplasma prevalence increased weakly but significantly with sample size per species, suggesting that prevalence in mammals is likely underestimated in less sampled species.
 
 ## Step 4. Variation in hemoplasma infection across mammalian orders (GLMM model 1) 
@@ -195,7 +195,7 @@ rownames(contingency_table) <- df_order$order
 contingency_table
 ```
 
-Contingency table is :
+Results :
 ```
 Order                infected_species uninfected_species
 Carnivora                      3                  3
@@ -220,6 +220,7 @@ data_hemoplasma_stat <- data_hemoplasma_stat %>%
 ```
 
 ### GLMM (Model 1)
+This model tests whether `hemoplasma` infection probability varies among mammalian orders (`order`) while controlling for differences in sampling effort (`log_n`) and accounting for species-level random effects (`1 | species`).
 ```
 mod1_full <- glmer(
   hemoplasma ~ order + log_n + (1 | species),
@@ -232,12 +233,8 @@ mod1_full <- glmer(
 )
 ```
 
-Model 1 objective :
-This model tests whether `hemoplasma` infection probability varies among mammalian orders (`order`) while controlling for differences in sampling effort (`log_n`) and accounting for species-level random effects (`1 | species`).
-
-
 ### Model term significance testing
-Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests)
+Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests).
 ```
 res <- drop1(mod1_full, test = "Chisq")
 res
@@ -255,11 +252,143 @@ log_n     1 416.19  3.4387 0.06369 .
 ```
 
 ### Interpretation
-Hemoplasma infection probability varied significantly among mammalian orders (χ² test, p = 0.032), indicating a non-random distribution of infection across host taxonomic groups.
+Hemoplasma infection probability varied significantly among mammalian orders (χ² test, _p_ = 0.032), indicating a non-random distribution of infection across host taxonomic groups.
 
-A marginal effect of sampling effort (`log_n`) was also detected (p = 0.064), suggesting a weak influence of species sampling intensity on observed prevalence.
+A marginal effect of sampling effort (`log_n`) was also detected (_p_ = 0.064), suggesting a weak influence of species sampling intensity on observed prevalence.
 
-Overall, host taxonomic structure appears to be the main driver of variation in hemoplasma infection in this model.
+### Model comparison with null and univariate models
+```
+mod1_null <- glmer(
+  hemoplasma ~ 1 + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+mod1_order <- glmer(
+  hemoplasma ~ order + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+mod1_log_n <- glmer(
+  hemoplasma ~ log_n + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+anova(mod1_null, mod1_order, test = "Chisq")
+anova(mod1_null, mod1_log_n, test = "Chisq")
+
+aics <- AIC(mod1_null, mod1_order, mod1_log_n)
+aic_null <- aics["mod1_null", "AIC"]
+aics$delta_AIC_vs_null <- aics$AIC - aic_null
+aics[, c("AIC", "delta_AIC_vs_null")]
+```
+
+Results : 
+```
+> anova(mod1_null, mod1_order, test="Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod1_null: hemoplasma ~ 1 + (1 | species)
+mod1_order: hemoplasma ~ order + (1 | species)
+           npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
+mod1_null     2 416.38 425.22 -206.19    412.38                       
+mod1_order    7 416.19 447.13 -201.10    402.19 10.187  5    0.07011 .
+
+> anova(mod1_null, mod1_log_n, test="Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod1_null: hemoplasma ~ 1 + (1 | species)
+mod1_log_n: hemoplasma ~ log_n + (1 | species)
+           npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod1_null     2 416.38 425.22 -206.19    412.38                     
+mod1_log_n    3 416.94 430.20 -205.47    410.94 1.4399  1     0.2302
+
+                AIC delta_AIC_vs_null
+mod1_null  416.3804         0.0000000
+mod1_order 416.1937        -0.1866964
+mod1_log_n 416.9406         0.5601158
+```
+
+### Interpretation (model comparison)
+The inclusion of `order` slightly improved model fit compared to the null model, although this effect was not statistically significant (_p_ = 0.07), suggesting a weak signal of taxonomic structure in infection probability.
+
+In contrast, `log_n` did not improve model fit (_p_ = 0.23), indicating no detectable effect of sampling effort.
+
+AIC comparisons supported these results, with minimal differences between models (ΔAIC < 1), indicating no strong support for any predictor over the null model.
+
+Overall, results suggest a weak but consistent tendency for variation in hemoplasma infection across mammalian orders.
+
+### Post-hoc analysis of differences between mammalian orders (model-based pairwise comparisons)
+We perform post-hoc comparisons to identify which orders differ in hemoplasma infection probability.
+```
+emm <- emmeans(mod1_full, pairwise ~ order, type = "response")
+emm
+```
+
+Results:
+```
+$emmeans
+ order             prob     SE  df asymp.LCL asymp.UCL
+ Carnivora       0.7165 0.2960 Inf    0.1267     0.978
+ Cingulata       0.2916 0.3570 Inf    0.0138     0.924
+ Didelphimorphia 0.1668 0.1250 Inf    0.0334     0.537
+ Pilosa          0.1183 0.1300 Inf    0.0115     0.607
+ Primates        0.8773 0.1400 Inf    0.3576     0.989
+ Rodentia        0.0518 0.0373 Inf    0.0121     0.195
+Confidence level used: 0.95 
+Intervals are back-transformed from the logit scale 
+
+$contrasts
+ contrast                    odds.ratio       SE  df null z.ratio p.value
+ Carnivora / Cingulata           6.1399  12.7000 Inf    1   0.878  0.9520
+ Carnivora / Didelphimorphia    12.6271  19.6000 Inf    1   1.637  0.5741
+ Carnivora / Pilosa             18.8321  38.3000 Inf    1   1.443  0.7005
+ Carnivora / Primates            0.3535   0.6030 Inf    1  -0.610  0.9904
+ Carnivora / Rodentia           46.2877  65.4000 Inf    1   2.715  0.0722
+ Cingulata / Didelphimorphia     2.0566   3.8300 Inf    1   0.387  0.9989
+ Cingulata / Pilosa              3.0671   6.6300 Inf    1   0.518  0.9955
+ Cingulata / Primates            0.0576   0.1170 Inf    1  -1.402  0.7260
+ Cingulata / Rodentia            7.5388  13.4000 Inf    1   1.138  0.8656
+ Didelphimorphia / Pilosa        1.4914   2.3300 Inf    1   0.256  0.9999
+ Didelphimorphia / Primates      0.0280   0.0410 Inf    1  -2.441  0.1422
+ Didelphimorphia / Rodentia      3.6658   3.8600 Inf    1   1.233  0.8206
+ Pilosa / Primates               0.0188   0.0346 Inf    1  -2.158  0.2577
+ Pilosa / Rodentia               2.4579   3.6800 Inf    1   0.600  0.9911
+ Primates / Rodentia           130.9573 177.0000 Inf    1   3.616  0.0041
+P value adjustment: tukey method for comparing a family of 6 estimates 
+Tests are performed on the log odds ratio scale 
+```
+
+### Interpretation
+Post-hoc pairwise comparisons showed variation in hemoplasma infection probability among mammalian orders, but most contrasts were not significant after Tukey correction.
+
+A significant difference was found between Primates and Rodentia (_p_ = 0.0041), suggesting higher infection probabilities in Primates compared to Rodents, while all other comparisons were non-significant.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
