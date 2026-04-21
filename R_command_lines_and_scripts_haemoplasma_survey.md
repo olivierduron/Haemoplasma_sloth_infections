@@ -119,7 +119,7 @@ Results are:
 # 34 more rows
 ```
 
-#### Visualization (Fig. S1)
+### Visualization (Fig. S1)
 ```
 p <- ggplot(species_summary, aes(x = n_sampled, y = prevalence)) + 
   geom_ribbon(
@@ -148,7 +148,7 @@ print(p)
 dev.off()
 ```
 
-## Spearman correlation test
+### Spearman correlation test
 ```
 cor.test(
   species_summary$n_sampled,
@@ -168,12 +168,12 @@ sample estimates:
 0.312126 
 ```
 
-## Interpretation
+Interpretation :
 Hemoplasma prevalence increased weakly but significantly with sample size per species, suggesting that prevalence in mammals is likely underestimated in less sampled species.
 
 ## Step 4. Variation in hemoplasma infection across mammalian orders (GLMM model 1) 
 
-## Contingency table
+### Contingency table
 ```
 df_species <- data_hemoplasma_stat %>%
   group_by(species, order) %>%
@@ -206,7 +206,7 @@ Primates                       2                  3
 Rodentia                       8                 11
 ```
 
-## GLMM preparation
+### GLMM preparation
 Sampling effort is included as a covariate (log-transformed number of individuals per species) :
 ```
 data_hemoplasma_stat <- data_hemoplasma_stat %>%
@@ -219,7 +219,7 @@ data_hemoplasma_stat <- data_hemoplasma_stat %>%
   mutate(hemoplasma = as.numeric(as.character(hemoplasma)))
 ```
 
-## GLMM (Model 1)
+### GLMM (Model 1)
 ```
 mod1_full <- glmer(
   hemoplasma ~ order + log_n + (1 | species),
@@ -232,7 +232,7 @@ mod1_full <- glmer(
 )
 ```
 
-## Model objective
+Model 1 objective :
 This model tests whether `hemoplasma` infection probability varies among mammalian orders (`order`) while controlling for differences in sampling effort (`log_n`) and accounting for species-level random effects (1 | species).
 
 
