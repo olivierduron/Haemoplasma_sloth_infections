@@ -335,8 +335,8 @@ Overall, results suggest a weak but consistent tendency for variation in hemopla
 ### Post-hoc analysis of differences between mammalian orders (model-based pairwise comparisons)
 We perform post-hoc comparisons to identify which orders differ in hemoplasma infection probability.
 ```
-emm <- emmeans(mod1_full, pairwise ~ order, type = "response")
-emm
+emm_order <- emmeans(mod1_full, pairwise ~ order, type = "response")
+emm_order
 ```
 
 Results:
@@ -378,177 +378,7 @@ Post-hoc pairwise comparisons showed variation in hemoplasma infection probabili
 
 A significant difference was found between Primates and Rodentia (_p_ = 0.0041), suggesting higher infection probabilities in Primates compared to Rodents, while all other comparisons were non-significant.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-Fit a GLMM to test the effects of `order` and `log_n` on 'hemoplasma', with `species` as a random effect :
-```
-mod1_full <- glmer(
-  hemoplasma ~ order + log_n + (1 | species),
-  family = binomial,
-  data = data_hemoplasma_stat,
-  control = glmerControl(optimizer = "bobyqa",
-                         optCtrl = list(maxfun = 1e5))
-)
-
-
-
-# Model selection (LRT) :
-mod1_no_order <- update(mod1_full, . ~ . - order)
-mod1_no_logn  <- update(mod1_full, . ~ . - log_n)
-anova(mod1_full, mod1_no_order, test = "Chisq")
-anova(mod1_full, mod1_no_logn, test = "Chisq")
-```
-
-Results are: 
-```
-> anova(mo1d_full, mod1_no_order, test = "Chisq")
-Data: data_hemoplasma_stat
-Models:
-mod1_no_order: hemoplasma ~ log_n + (1 | species)
-mod1_full: hemoplasma ~ order + log_n + (1 | species)
-             npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
-mod1_no_order    3 416.94 430.20 -205.47    410.94                       
-mod1_full        8 414.76 450.11 -199.38    398.76 12.185  5    0.03233 *
-> anova(mod1_full, mod1_no_logn, test = "Chisq")
-Data: data_hemoplasma_stat
-Models:
-mod1_no_logn: hemoplasma ~ order + (1 | species)
-mod1_full: hemoplasma ~ order + log_n + (1 | species)
-            npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
-mod1_no_logn    7 416.19 447.13 -201.10    402.19                       
-mod1_full       8 414.76 450.11 -199.38    398.76 3.4387  1    0.06369 .
-```
-
-AIC comparison : 
-```
-AIC_table <- AIC(mod1_full, mod1_no_order, mod1_no_logn)
-AIC_table$delta_AIC <- AIC_table$AIC - min(AIC_table$AIC)
-AIC_table
-```
-
-Results are :
-```
-             df      AIC
-mod1_full      8 414.7550
-mod1_no_order  3 416.9406
-mod1_no_logn   7 416.1937
-```
-
-Summarize full model :
-```
-summary(mo1d_full)
-```
-
-Results are :
-```
-Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
- Family: binomial  ( logit )
-Formula: hemoplasma ~ order + log_n + (1 | species)
-   Data: data_hemoplasma_stat
-Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 1e+05))
-
-      AIC       BIC    logLik -2*log(L)  df.resid 
-    414.8     450.1    -199.4     398.8       606 
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--3.0444 -0.2310 -0.1769  0.1224  4.7470 
-
-Random effects:
- Groups  Name        Variance Std.Dev.
- species (Intercept) 3.347    1.829   
-Number of obs: 614, groups:  species, 44
-
-Fixed effects:
-                     Estimate Std. Error z value Pr(>|z|)   
-(Intercept)           -1.3932     1.1807  -1.180  0.23800   
-orderCingulata        -1.8148     2.0681  -0.878  0.38021   
-orderDidelphimorphia  -2.5358     1.5494  -1.637  0.10170   
-orderPilosa           -2.9356     2.0342  -1.443  0.14899   
-orderPrimates          1.0400     1.7047   0.610  0.54182   
-orderRodentia         -3.8349     1.4124  -2.715  0.00662 **
-log_n                  0.6804     0.3915   1.738  0.08225 . 
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Correlation of Fixed Effects:
-            (Intr) ordrCn ordrDd ordrPl ordrPr ordrRd
-orderCinglt -0.419                                   
-ordrDdlphmr -0.527  0.501                            
-orderPilosa -0.316  0.445  0.651                     
-orderPrimts -0.515  0.431  0.598  0.526              
-orderRodent -0.599  0.534  0.751  0.676  0.640       
-log_n       -0.333 -0.249 -0.434 -0.587 -0.277 -0.409
-```
-
-Predicted infection probabilities with confidence interval per order :
-```
-emm1_prob <- emmeans(mod1_full, ~ order, type = "response")
-prob1_df <- as.data.frame(emm1_prob)
-prob1_df <- prob_df %>%
-  mutate(
-    percent = prob * 100,
-    lower_percent = asymp.LCL * 100,
-    upper_percent = asymp.UCL * 100
-  )
-emm1_prob
-```
-
-Results are :
-```
-            order       prob         SE  df   asymp.LCL  asymp.UCL   percent lower_percent upper_percent
-1       Carnivora 0.32124636 0.25153810 Inf 0.047018484 0.81949870 32.124636     4.7018484     81.949870
-2       Cingulata 0.14399309 0.21028873 Inf 0.005903137 0.82654332 14.399309     0.5903137     82.654332
-3 Didelphimorphia 0.10004408 0.07972107 Inf 0.019224258 0.38667771 10.004408     1.9224258     38.667771
-4          Pilosa 0.13682287 0.14390491 Inf 0.014342216 0.63326195 13.682287     1.4342216     63.326195
-5        Primates 0.72790324 0.24377576 Inf 0.193356424 0.96759081 72.790324    19.3356424     96.759081
-6        Rodentia 0.02417335 0.01635629 Inf 0.006324077 0.08794235  2.417335     0.6324077      8.794235
-```
-
-Tukey-adjusted post-hoc comparisons of estimated marginal means :
-```
-pairs(emm1_prob, adjust = "tukey")
-```
-
-Results are :
-```
- contrast                    estimate   SE  df z.ratio p.value
- Carnivora - Cingulata         1.0345 2.05 Inf   0.505  0.9960
- Carnivora - Didelphimorphia   1.4487 1.44 Inf   1.007  0.9159
- Carnivora - Pilosa            1.0939 1.66 Inf   0.659  0.9863
- Carnivora - Primates         -1.7321 1.67 Inf  -1.039  0.9050
- Carnivora - Rodentia          2.9500 1.33 Inf   2.222  0.2273
- Cingulata - Didelphimorphia   0.4142 1.89 Inf   0.220  0.9999
- Cingulata - Pilosa            0.0594 2.05 Inf   0.029  1.0000
- Cingulata - Primates         -2.7665 2.05 Inf  -1.347  0.7586
- Cingulata - Rodentia          1.9155 1.80 Inf   1.065  0.8952
- Didelphimorphia - Pilosa     -0.3548 1.46 Inf  -0.244  0.9999
- Didelphimorphia - Primates   -3.1807 1.46 Inf  -2.180  0.2473
- Didelphimorphia - Rodentia    1.5013 1.07 Inf   1.409  0.7218
- Pilosa - Primates            -2.8259 1.67 Inf  -1.694  0.5358
- Pilosa - Rodentia             1.8561 1.34 Inf   1.383  0.7372
- Primates - Rodentia           4.6820 1.34 Inf   3.485  0.0065
-Results are given on the log odds ratio (not the response) scale. 
-P value adjustment: tukey method for comparing a family of 6 estimates 
-```
-
-Create a plot of hemoplasma prevalence by species and mammalian order :
+### Create a plot of hemoplasma prevalence by species and mammalian order
 ```
 df_species <- data_hemoplasma_stat %>%
   group_by(species, order) %>%
@@ -648,22 +478,24 @@ ggsave(
 )
 ```
 
-## Step 5. Test infection prevalence variation across sex in infected mammalian species (GLMM with species random effect : model #2) : 
+## Step 5. Variation in hemoplasma infection across sex in infected mammalian species (GLMM model 2)
 
-Prepare data :
+### Data preparation
+We restricted the analysis to mammalian species with at least one infected individual, in order to test sex effects within relevant host species.
 ```
-species_infected <- data_hemoplasma_stat %>%
+data_sex <- data_hemoplasma_stat[
+  complete.cases(data_hemoplasma_stat[, c("hemoplasma", "sex", "species")]),
+]
+species_infected_sex <- data_sex %>%
   group_by(species) %>%
   summarise(infected = any(hemoplasma == 1, na.rm = TRUE)) %>%
   filter(infected) %>%
   pull(species)
-data_inf <- data_hemoplasma_stat %>%
-  filter(species %in% species_infected)
-data_inf <- data_inf %>%
-  mutate(
-    hemoplasma = as.numeric(as.character(hemoplasma))
-  ) %>%
-  filter(!is.na(sex)) %>%   # IMPORTANT pour LRT
+
+data_inf_sex <- data_sex %>%
+  filter(species %in% species_infected_sex) %>%
+  mutate(hemoplasma = as.numeric(as.character(hemoplasma))) %>%
+  filter(!is.na(sex)) %>%  # required for LRT consistency
   group_by(species) %>%
   mutate(
     n_sampled = n(),
@@ -672,19 +504,142 @@ data_inf <- data_inf %>%
   ungroup()
 ```
 
-GLMM full model :
+### GLMM (Model 2)
+This model tests whether hemoplasma infection probability differs between sexes (`sex`) while controlling for sampling effort (`log_n`) and accounting for species-level random effects (`1 | species`).
 ```
-mod2_sex_inf <- glmer(
+mod2_full <- glmer(
   hemoplasma ~ sex + log_n + (1 | species),
   family = binomial,
-  data = data_inf,
-  control = glmerControl(optimizer = "bobyqa",
-                         optCtrl = list(maxfun = 1e5))
+  data = data_inf_sex,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
 )
-summary(mod2_sex_inf)
 ```
 
-Model selection (LRT) :
+### Model term significance testing
+Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests).
+```
+res <- drop1(mod2_full, test = "Chisq")
+res
+```
+
+Results :
+```
+Single term deletions
+Model:
+hemoplasma ~ sex + log_n + (1 | species)
+       npar    AIC     LRT Pr(Chi)  
+<none>      279.07                
+sex       1 279.59 2.52007  0.1124
+log_n     1 277.51 0.44085  0.5067
+```
+
+### Interpretation
+blabla
+
+### Model comparison with null and univariate models
+```
+mod2_null <- glmer(
+  hemoplasma ~ 1 + (1 | species),
+  family = binomial,
+  data = data_inf_sex,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+mod2_sex <- glmer(
+  hemoplasma ~ sex + (1 | species),
+  family = binomial,
+  data = data_inf_sex,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+mod2_log_n <- glmer(
+  hemoplasma ~ log_n + (1 | species),
+  family = binomial,
+  data = data_inf_sex,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 1e5)
+  )
+)
+
+anova(mod2_null, mod2_sex, test = "Chisq")
+anova(mod2_null, mod2_log_n, test = "Chisq")
+
+aics <- AIC(mod2_null, mod2_sex, mod2_log_n)
+aic_null <- aics["mod2_null", "AIC"]
+aics$delta_AIC_vs_null <- aics$AIC - aic_null
+aics[, c("AIC", "delta_AIC_vs_null")]
+```
+
+Results :
+```
+> anova(mod2_null, mod2_sex, test = "Chisq")
+Data: data_inf_sex
+Models:
+mod2_null: hemoplasma ~ 1 + (1 | species)
+mod2_sex: hemoplasma ~ sex + (1 | species)
+          npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod2_null    2 278.07 285.65 -137.03    274.07                     
+mod2_sex     3 277.51 288.89 -135.75    271.51 2.5598  1     0.1096
+
+> anova(mod2_null, mod2_log_n, test = "Chisq")
+Data: data_inf_sex
+Models:
+mod2_null: hemoplasma ~ 1 + (1 | species)
+mod2_log_n: hemoplasma ~ log_n + (1 | species)
+           npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod2_null     2 278.07 285.65 -137.03    274.07                     
+mod2_log_n    3 279.59 290.97 -136.79    273.59 0.4806  1     0.4881
+
+                AIC delta_AIC_vs_null
+mod2_null  278.0684         0.0000000
+mod2_sex   277.5086        -0.5598415
+mod2_log_n 279.5878         1.5193843
+```
+
+### Interpretation (model comparison)
+blabla
+
+### Post-hoc analysis of differences between sex in infected species (model-based pairwise comparisons)
+
+We perform post-hoc comparisons to identify if sexes differ in hemoplasma infection probability.
+
+```
+emm_sex <- emmeans(mod2_full, pairwise ~ sex, type = "response")
+emm_sex
+```
+
+Results:
+```
+$emmeans
+ sex  prob    SE  df asymp.LCL asymp.UCL
+ F   0.371 0.202 Inf    0.0972     0.764
+ M   0.506 0.214 Inf    0.1603     0.846
+Confidence level used: 0.95 
+Intervals are back-transformed from the logit scale 
+
+$contrasts
+ contrast odds.ratio    SE  df null z.ratio p.value
+ F / M         0.576 0.199 Inf    1  -1.594  0.1109
+```
+
+### Interpretation
+blabla
+
+
+
+
+
+
 ```
 mod2_no_sex <- update(mod2_sex_inf, . ~ . - sex)
 mod2_no_logn  <- update(mod2_sex_inf, . ~ . - log_n)
@@ -726,10 +681,6 @@ mod2_sex_inf  4 287.4924  1.998161
 mod2_no_sex   3 288.2876  2.793350
 mod_no_logn   3 285.4942  0.000000
 ```
-
-
-SIMPLIFICATION A REVOIR !!!
-
 
 Estimated marginal means (emmeans): 
 ```
