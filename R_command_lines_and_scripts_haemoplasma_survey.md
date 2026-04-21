@@ -233,13 +233,40 @@ mod1_full <- glmer(
 ```
 
 Model 1 objective :
-This model tests whether `hemoplasma` infection probability varies among mammalian orders (`order`) while controlling for differences in sampling effort (`log_n`) and accounting for species-level random effects (1 | species).
+This model tests whether `hemoplasma` infection probability varies among mammalian orders (`order`) while controlling for differences in sampling effort (`log_n`) and accounting for species-level random effects (`1 | species`).
+
+
+### Model term significance testing
+Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests)
+```
+res <- drop1(mod1_full, test = "Chisq")
+res
+```
+
+Results :
+```
+Single term deletions
+Model:
+hemoplasma ~ order + log_n + (1 | species)
+       npar    AIC     LRT Pr(Chi)  
+<none>      414.76                  
+order     5 416.94 12.1855 0.03233 *
+log_n     1 416.19  3.4387 0.06369 .
+```
+
+### Interpretation
+Hemoplasma infection probability varied significantly among mammalian orders (χ² test, p = 0.032), indicating a non-random distribution of infection across host taxonomic groups.
+
+A marginal effect of sampling effort (`log_n`) was also detected (p = 0.064), suggesting a weak influence of species sampling intensity on observed prevalence.
+
+Overall, host taxonomic structure appears to be the main driver of variation in hemoplasma infection in this model.
 
 
 
 
 
 
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Fit a GLMM to test the effects of `order` and `log_n` on 'hemoplasma', with `species` as a random effect :
 ```
 mod1_full <- glmer(
