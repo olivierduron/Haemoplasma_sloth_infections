@@ -645,39 +645,52 @@ To test whether `hemoplasma` infection differs between males and females within 
 
 ### Data preparation
 ```
-species_infected <- data_hemoplasma_stat %>%
+data_clean <- data_hemoplasma_stat %>%
   mutate(hemoplasma = as.numeric(as.character(hemoplasma))) %>%
-  group_by(species) %>%
-  summarise(any_infected = any(hemoplasma == 1, na.rm = TRUE)) %>%
-  filter(any_infected) %>%
-  pull(species)
+  filter(!is.na(sex))
 
-data_test <- data_hemoplasma_stat %>%
-  filter(
-    species %in% species_infected,
-    !is.na(sex)
+species_keep <- data_clean %>%
+  group_by(species) %>%
+  summarise(
+    n_sexed = n(),
+    any_infected = any(hemoplasma == 1, na.rm = TRUE),
+    .groups = "drop"
   ) %>%
-  mutate(hemoplasma = as.numeric(as.character(hemoplasma)))
-
-species_keep <- data_test %>%
-  group_by(species) %>%
-  summarise(n_sexed = n()) %>%
-  filter(n_sexed >= 20) %>%
+  filter(n_sexed >= 20, any_infected) %>%
   pull(species)
 
-data_fisher <- data_test %>%
-  filter(species %in% species_keep)
-  
 write.csv(species_keep,
           "species_used_fisher_sex_bias.csv",
           row.names = FALSE)
 
-species_keep
+species_sex_summary <- data_clean %>%
+  filter(species %in% species_keep) %>%
+  group_by(species, sex) %>%
+  summarise(
+    n_total = n(),
+    n_infected = sum(hemoplasma == 1, na.rm = TRUE),
+    n_uninfected = sum(hemoplasma == 0, na.rm = TRUE),
+    prevalence = n_infected / n_total,
+    .groups = "drop"
+  ) %>%
+  arrange(species, sex)
+species_sex_summary %>%
+  arrange(species, sex)
 ```
 
-Results (list of infected `species` that had at least 20 sexed individuals) :
+Results for infected `species` that had at least 20 sexed individuals :
 ```
-[1] Bradypus_tridactylus  Choloepus_didactylus  Didelphis_marsupialis Saguinus_midas  
+# A tibble: 8 × 6
+  species               sex   n_total n_infected n_uninfected prevalence
+  <fct>                 <fct>   <int>      <int>        <int>      <dbl>
+1 Bradypus_tridactylus  F          43          2           41     0.0465
+2 Bradypus_tridactylus  M          49          2           47     0.0408
+3 Choloepus_didactylus  F          49         39           10     0.796 
+4 Choloepus_didactylus  M          34         29            5     0.853 
+5 Didelphis_marsupialis F          19          8           10     0.421 
+6 Didelphis_marsupialis M          19         13            5     0.684 
+7 Saguinus_midas        F          15         15            0     1     
+8 Saguinus_midas        M          23         23            0     1     
 ```
 
 ### Fisher exact tests per species
@@ -727,11 +740,10 @@ Results :
 ```
 
 ### Interpretation
-```
 Fisher exact tests performed separately for each species (restricted to species with ≥20 sexed individuals and at least one infected individual) revealed no significant sex differences in hemoplasma infection after FDR correction. For _Saguinus midas_, the test could not be computed due to insufficient data structure in the contingency table (ie, all individuals are infected).
-```
 
 ### Create a plot of hemoplasma prevalence by infected species
+```
 species_infected <- data_hemoplasma_stat %>%
   mutate(hemoplasma = as.numeric(as.character(hemoplasma))) %>%
   group_by(species) %>%
