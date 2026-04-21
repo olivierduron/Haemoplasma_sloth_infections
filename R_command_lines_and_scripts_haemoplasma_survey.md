@@ -79,7 +79,7 @@ library(patchwork)
 
 We first evaluated whether infection prevalence depends on species sampling effort.
 
-## Species-level summary
+### Species-level summary
 ```
 species_summary <- data_hemoplasma_stat %>%
   group_by(species) %>%
