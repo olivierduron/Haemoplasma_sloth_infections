@@ -236,8 +236,8 @@ mod1_full <- glmer(
 ### Model term significance testing
 Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests).
 ```
-res <- drop1(mod1_full, test = "Chisq")
-res
+res1 <- drop1(mod1_full, test = "Chisq")
+res1
 ```
 
 Results :
@@ -481,7 +481,7 @@ ggsave(
 ## Step 5. Variation in hemoplasma infection across sex within species where infection was detected (GLMM model 2)
 
 ### Data preparation
-We restricted the analysis to mammalian species with at least one infected individual, in order to test sex effects within relevant host species.
+We restricted here the analysis to mammalian species with at least one infected individual, in order to test sex effects within relevant host species.
 ```
 data_sex <- data_hemoplasma_stat[
   complete.cases(data_hemoplasma_stat[, c("hemoplasma", "sex", "species")]),
@@ -521,8 +521,8 @@ mod2_full <- glmer(
 ### Model term significance testing
 Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests).
 ```
-res <- drop1(mod2_full, test = "Chisq")
-res
+res2 <- drop1(mod2_full, test = "Chisq")
+res2
 ```
 
 Results :
@@ -834,16 +834,9 @@ print(p_sex_species)
 dev.off()
 ```
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+## Step 6. Variation in hemoplasma infection across host ecological traits (GLMM Model 3) 
 
-
-
-
-
-
-## Step 6. Test infection prevalence variation across species ecological traits (GLMM with species random effect : model #3) : 
-
-Prepare data (sampling effort) :
+### Data preparation
 ```
 data_hemoplasma_stat <- data_hemoplasma_stat %>%
   group_by(species) %>%
@@ -854,6 +847,271 @@ data_hemoplasma_stat <- data_hemoplasma_stat %>%
   ungroup()
 ```
 
+### GLMM (Model 3)
+
+This model tests whether hemoplasma infection probability varies according to host ecological traits (`vertical_stratum`, `activity`, `diet`, `sociality`), while controlling for sampling effort (`log_n`) and accounting for species-level random effects (`1 | species`).
+```
+mod3_full <- glmer(
+  hemoplasma ~ vertical_stratum + activity + diet + sociality + log_n + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+```
+
+### Model term significance testing
+Model terms were evaluated using likelihood ratio tests via single-term deletions (drop1 function with Chi-square tests).
+```
+res3 <- drop1(mod3_full, test = "Chisq")
+res3
+```
+
+Results :
+```
+Single term deletions
+Model:
+hemoplasma ~ vertical_stratum + activity + diet + sociality + log_n + (1 | species)
+                 npar    AIC    LRT Pr(Chi)  
+<none>                421.76                 
+vertical_stratum    2 418.86 1.0977 0.57760  
+activity            1 423.09 3.3279 0.06812 .
+diet                3 416.11 0.3554 0.94930  
+sociality           1 419.80 0.0445 0.83297
+log_n               1 423.37 3.6160 0.05723 .  
+```
+
+### Interpretation
+No significant effect of host ecological traits was detected on hemoplasma infection probability. Activity and sampling effort showed weak non-significant trends but did not reach statistical significance.
+
+
+### Model comparison with null and univariate models
+```
+
+mod3_null <- glmer(
+  hemoplasma ~ 1 + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+mod3_vertical_stratum <- glmer(
+  hemoplasma ~ vertical_stratum + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+mod3_activity <- glmer(
+  hemoplasma ~ activity + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+mod3_diet <- glmer(
+  hemoplasma ~ diet + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+mod3_sociality <- glmer(
+  hemoplasma ~ sociality + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+mod3_log_n <- glmer(
+  hemoplasma ~ log_n + (1 | species),
+  family = binomial,
+  data = data_hemoplasma_stat,
+  control = glmerControl(
+    optimizer = "bobyqa",
+    optCtrl = list(maxfun = 2e5)
+  )
+)
+
+anova(mod3_null, mod3_vertical_stratum, test = "Chisq")
+anova(mod3_null, mod3_activity, test = "Chisq")
+anova(mod3_null, mod3_diet, test = "Chisq")
+anova(mod3_null, mod3_sociality, test = "Chisq")
+anova(mod3_null, mod3_log_n, test = "Chisq")
+
+aics <- AIC(mod3_null,
+            mod3_vertical_stratum,
+            mod3_activity,
+            mod3_diet,
+            mod3_sociality,
+            mod3_log_n)
+
+aic_null <- aics["mod3_null", "AIC"]
+aics$delta_AIC_vs_null <- aics$AIC - aic_null
+aics[, c("AIC", "delta_AIC_vs_null")]
+```
+
+Results : 
+```
+> anova(mod3_null, mod3_vertical_stratum, test = "Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod3_null: hemoplasma ~ 1 + (1 | species)
+mod3_vertical_stratum: hemoplasma ~ vertical_stratum + (1 | species)
+                      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod3_null                2 416.38 425.22 -206.19    412.38                     
+mod3_vertical_stratum    4 419.55 437.23 -205.78    411.55 0.8301  2     0.6603
+
+> anova(mod3_null, mod3_activity, test = "Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod3_null: hemoplasma ~ 1 + (1 | species)
+mod3_activity: hemoplasma ~ activity + (1 | species)
+              npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)  
+mod3_null        2 416.38 425.22 -206.19    412.38                       
+mod3_activity    3 413.14 426.40 -203.57    407.14 5.2439  1    0.02202 *
+
+> anova(mod3_null, mod3_diet, test = "Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod3_null: hemoplasma ~ 1 + (1 | species)
+mod3_diet: hemoplasma ~ diet + (1 | species)
+          npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod3_null    2 416.38 425.22 -206.19    412.38                     
+mod3_diet    5 419.44 441.54 -204.72    409.44 2.9409  3     0.4008
+
+> anova(mod3_null, mod3_sociality, test = "Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod3_null: hemoplasma ~ 1 + (1 | species)
+mod3_sociality: hemoplasma ~ sociality + (1 | species)
+               npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod3_null         2 416.38 425.22 -206.19    412.38                     
+mod3_sociality    3 417.58 430.84 -205.79    411.58 0.8027  1     0.3703
+
+> anova(mod3_null, mod3_log_n, test = "Chisq")
+Data: data_hemoplasma_stat
+Models:
+mod3_null: hemoplasma ~ 1 + (1 | species)
+mod3_log_n: hemoplasma ~ log_n + (1 | species)
+           npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+mod3_null     2 416.38 425.22 -206.19    412.38                     
+mod3_log_n    3 416.94 430.20 -205.47    410.94 1.4399  1     0.2302
+
+                           AIC delta_AIC_vs_null
+mod3_null             416.3804         0.0000000
+mod3_vertical_stratum 419.5503         3.1698637
+mod3_activity         413.1365        -3.2439419
+mod3_diet             419.4395         3.0590596
+mod3_sociality        417.5777         1.1973107
+mod3_log_n            416.9406         0.5601158
+```
+
+### Interpretation
+Activity showed a marginal effect in the univariate model comparison (_p_ = 0.022), but this pattern was not robust in the full multivariate model (see above).
+
+### Marginal means (estimated infection probabilities)
+We estimated marginal means (back-transformed to response scale) for each level of host ecological traits.
+
+```
+emm_vertical_stratum <- emmeans(mod3_full, ~ vertical_stratum, type = "response")
+emm_activity <- emmeans(mod3_full, ~ activity, type = "response")
+emm_diet <- emmeans(mod3_full, ~ diet, type = "response")
+emm_sociality <- emmeans(mod3_full, ~ sociality, type = "response")
+
+emm_vertical_stratum
+emm_activity
+emm_diet
+emm_sociality
+```
+
+Results :
+```
+ vertical_stratum   prob    SE  df asymp.LCL asymp.UCL
+ Canopy           0.4112 0.298 Inf   0.05898     0.886
+ Ground           0.4723 0.261 Inf   0.10315     0.874
+ Mixed            0.0876 0.177 Inf   0.00126     0.879
+
+ activity    prob     SE  df asymp.LCL asymp.UCL
+ Diurnal   0.6517 0.3250 Inf   0.10161     0.969
+ Nocturnal 0.0757 0.0919 Inf   0.00621     0.518
+
+ diet         prob    SE  df asymp.LCL asymp.UCL
+ Carnivore   0.469 0.583 Inf   0.00888     0.989
+ Insectivore 0.199 0.317 Inf   0.00498     0.925
+ Omnivore    0.212 0.172 Inf   0.03459     0.670
+ Phytophage  0.284 0.272 Inf   0.02822     0.845
+
+ sociality  prob    SE  df asymp.LCL asymp.UCL
+ Group     0.312 0.307 Inf    0.0268     0.882
+ Solitary  0.252 0.226 Inf    0.0313     0.779
+
+Results are averaged over the levels of: vertical_stratum, activity, diet 
+Confidence level used: 0.95 
+Intervals are back-transformed from the logit scale 
+```
+
+### Post-hoc analysis of differences between levelS of host ecological traits (model-based pairwise comparisons)
+```
+pairs(emmeans(mod3_full, ~ vertical_stratum), adjust = "tukey")
+pairs(emmeans(mod3_full, ~ activity), adjust = "tukey")
+pairs(emmeans(mod3_full, ~ diet), adjust = "tukey")
+pairs(emmeans(mod3_full, ~ sociality), adjust = "tukey")
+```
+
+Results:
+```
+> pairs(emmeans(mod3_full, ~ vertical_stratum), adjust = "tukey")
+ contrast        estimate   SE  df z.ratio p.value
+ Canopy - Ground   -0.248 1.13 Inf  -0.219  0.9739
+ Canopy - Mixed     1.984 2.28 Inf   0.869  0.6596
+ Ground - Mixed     2.233 2.20 Inf   1.017  0.5661
+
+> pairs(emmeans(mod3_full, ~ activity), adjust = "tukey")
+ contrast            estimate   SE  df z.ratio p.value
+ Diurnal - Nocturnal     3.13 1.61 Inf   1.946  0.0517
+
+> pairs(emmeans(mod3_full, ~ diet), adjust = "tukey")
+ contrast                 estimate   SE  df z.ratio p.value
+ Carnivore - Insectivore    1.2706 2.79 Inf   0.455  0.9687
+ Carnivore - Omnivore       1.1872 2.42 Inf   0.490  0.9614
+ Carnivore - Phytophage     0.7991 2.63 Inf   0.304  0.9903
+ Insectivore - Omnivore    -0.0834 1.76 Inf  -0.047  1.0000
+ Insectivore - Phytophage  -0.4716 2.06 Inf  -0.229  0.9958
+ Omnivore - Phytophage     -0.3881 1.18 Inf  -0.328  0.9878
+
+> pairs(emmeans(mod3_full, ~ sociality), adjust = "tukey")
+ contrast         estimate   SE  df z.ratio p.value
+ Group - Solitary    0.298 1.41 Inf   0.211  0.8328
+```
+
+### Interpretation
+Marginal means showed broadly overlapping confidence intervals across all ecological trait categories. Tukey-adjusted pairwise comparisons revealed no significant differences among levels of vertical stratum, diet, or sociality, and only a marginal diurnal–nocturnal contrast (_p_ = 0.052).
+
+
+
+
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Fit models : 
 ```
 # Null model (random effect only)
